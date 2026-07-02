@@ -1,6 +1,6 @@
 # Lit Review Agent
 
-Physician-advisor-grade systematic literature review tool, built as a set of [Claude Code](https://claude.com/claude-code) skills. Given a research question, it runs the full workflow of a professional systematic review — PICO formulation, multi-database search, PRISMA-grade dual-pass screening, citation chasing, quality appraisal, and structured synthesis — and produces an executive summary, evidence table, and Zotero-importable citations suitable for C-suite presentations and quality committee reports. It runs entirely inside your Claude Code subscription; no Anthropic API key is required (the Python backend is a pure data layer that talks to free literature APIs, never the model).
+Academic-physician-grade systematic literature review tool, built as a set of [Claude Code](https://claude.com/claude-code) skills. Given a research question, it runs the full workflow of a professional systematic review — PICO formulation, multi-database search, PRISMA-grade dual-pass screening, citation chasing, quality appraisal, and structured synthesis — and produces an executive summary, evidence table, and Zotero-importable citations suitable for C-suite presentations and quality committee reports. It runs entirely inside your Claude Code subscription; no Anthropic API key is required (the Python backend is a pure data layer that talks to free literature APIs, never the model).
 
 ---
 
@@ -107,7 +107,7 @@ Every stage writes its output to `reviews/{review-slug}/` immediately, and `stat
 | `retrieval_list.csv` | Combined candidate list with PDF status |
 | `library_request.csv` | Articles to request through your institution's library |
 | `quality_report.md` | Per-article quality appraisal with instrument and score |
-| `executive_summary.md` | Physician-advisor narrative summary (C-suite format) |
+| `executive_summary.md` | Academic-physician narrative summary (C-suite format) |
 | `prisma_flow.md` | PRISMA 2020 flow diagram with counts |
 | `gap_analysis.md` | Evidence gaps and future research directions |
 | `ai_disclosure.md` | AI-use disclosure — which stages were AI-assisted vs. automated, human checkpoints, limitations |

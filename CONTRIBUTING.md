@@ -1,7 +1,7 @@
 # Contributing to lit-review-agent
 
 Thanks for your interest in contributing. This project is a Claude Code skill
-that performs physician-advisor-grade academic literature reviews. Contributions
+that performs academic-physician-grade literature reviews. Contributions
 of all kinds — bug fixes, new features, documentation, tests — are welcome.
 
 ## Setup

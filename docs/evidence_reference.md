@@ -199,7 +199,7 @@ Populate after synthesis. Rows = outcomes; columns = study design. Shows where e
 
 From Considine et al. (2017): *"Stay true to the outcomes of interest listed in the PICO question. The reason so many studies use surrogate outcomes is because it is easier, faster and often cheaper than using complex, hard clinical outcomes."*
 
-**Common surrogate outcome pitfalls in physician advisor work:**
+**Common surrogate outcome pitfalls in academic physician work:**
 
 | PICO Outcome | Common Surrogate | Problem |
 |---|---|---|
@@ -212,7 +212,7 @@ The `data_extractor` skill flags surrogate outcomes. The `synthesizer` notes the
 
 ---
 
-## Notes on Applying Evidence Levels in Physician Advisor Work
+## Notes on Applying Evidence Levels in Academic Physician Work
 
 - **Don't downgrade based on study type alone.** A well-conducted cohort study may be more generalizable to your health system's population than an RCT conducted in a different setting.
 - **Consistency across studies matters.** Multiple Level III-2 studies consistently showing the same effect are often stronger evidence than one Level II study with methodological concerns.

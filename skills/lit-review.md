@@ -1,11 +1,11 @@
 ---
 name: lit-review
-description: Use when the user invokes /lit-review to run a physician-advisor-grade systematic or scoping literature review. Covers all pipeline stages from PICO formulation through output package. Session-safe with state persistence.
+description: Use when the user invokes /lit-review to run an academic-physician-grade systematic or scoping literature review. Covers all pipeline stages from PICO formulation through output package. Session-safe with state persistence.
 ---
 
 # Lit Review Agent — Skill v1
 
-Physician-advisor-grade systematic literature review assistant. Covers all 16 stages of the pipeline (question formulation through final output package). Session-safe: state is persisted after every stage; you can safely end and resume at any human checkpoint.
+Academic-physician-grade systematic literature review assistant. Covers all 16 stages of the pipeline (question formulation through final output package). Session-safe: state is persisted after every stage; you can safely end and resume at any human checkpoint.
 
 ---
 

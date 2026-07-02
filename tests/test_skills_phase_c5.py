@@ -334,7 +334,7 @@ class TestOutputFormatterPrepare:
         _write_synthesis(review_dir)
         out = _capture_fmt_prepare(capsys, review_dir)
         assert "executive_summary_task" in out
-        assert "physician advisor" in out["executive_summary_task"]
+        assert "academic physician" in out["executive_summary_task"]
 
     def test_by_outcome_in_output(self, tmp_path, capsys):
         _, review_dir = _make_review(tmp_path, status=ReviewStatus.synthesized)

@@ -102,7 +102,7 @@ lit-review-agent/
 │       ├── download_report.json        # Download status per article
 │       ├── quality_report.md           # Per-article quality appraisal
 │       ├── synthesis.json              # Synthesis work (evidence map, by-outcome narratives)
-│       ├── executive_summary.md        # Physician-advisor grade narrative summary
+│       ├── executive_summary.md        # Academic-physician-grade narrative summary
 │       ├── prisma_flow.md              # PRISMA 2020 flow diagram with counts
 │       ├── gap_analysis.md             # Evidence gaps + future research directions
 │       ├── gap_analysis.json           # Structured gap suggestions (for iteration)

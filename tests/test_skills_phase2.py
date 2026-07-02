@@ -415,7 +415,7 @@ class TestRunDedup:
             "ICU early mobility protocols shorten hospital stay",
             "CDI query compliance improves MS-DRG capture",
             "Palliative care consultation reduces inpatient costs",
-            "Physician advisor impact on utilization management",
+            "Academic physician impact on utilization management",
         ]
         articles = [_make_article(doi=f"10.1/{i}", title=t) for i, t in enumerate(distinct_titles)]
         _write_raw(review_dir, articles)

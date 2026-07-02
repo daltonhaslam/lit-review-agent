@@ -41,7 +41,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** None required
 - **Synthesis:** Thematic, chronological, or conceptual framework
 - **Typical use:** Background sections; conference presentations; conceptual papers
-- **Physician advisor use:** Staff education; introducing a topic to medical staff leadership
+- **Academic physician use:** Staff education; introducing a topic to medical staff leadership
 - **Time estimate:** Days to 2 weeks
 
 ### Scoping Review
@@ -50,7 +50,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** None required (though quality may be noted)
 - **Synthesis:** Analytic/thematic frameworks + numerical distributions and frequency tables
 - **Typical use:** Before a systematic review; before designing a new program
-- **Physician advisor use:** "What do we know about bedside CDI query programs?" before designing a new workflow
+- **Academic physician use:** "What do we know about bedside CDI query programs?" before designing a new workflow
 - **Time estimate:** 1–3 weeks
 
 ### Systematic Review
@@ -59,7 +59,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** Risk of bias + quality of evidence required; validated instruments (AMSTAR-2, RoB 2.0, GRADE, COREQ, STROBE)
 - **Synthesis:** Meta-analysis if sufficient homogeneity; qualitative synthesis (vote counting, content analysis, tabulation) otherwise
 - **Typical use:** Informing clinical guidelines; evidence-based policy; formal publications
-- **Physician advisor use:** "What is the strength of evidence for nurse-driven foley removal protocols on CAUTI rates?" for quality committee presentation
+- **Academic physician use:** "What is the strength of evidence for nurse-driven foley removal protocols on CAUTI rates?" for quality committee presentation
 - **Time estimate:** 3–8 weeks (with this agent: 2–4 weeks across ~6 sessions)
 
 ### Umbrella Review (Overview of SRs)
@@ -68,7 +68,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** AMSTAR-2 applied to each included SR; GRADE applied to evidence
 - **Synthesis:** Tabular comparison of SR findings; narrative comparison; sometimes indirect statistical comparisons
 - **Typical use:** Clinical guidelines development; policy decisions spanning multiple interventions
-- **Physician advisor use:** "What do all the SRs say about sepsis bundle components?" for hospital policy
+- **Academic physician use:** "What do all the SRs say about sepsis bundle components?" for hospital policy
 - **Time estimate:** 2–4 weeks
 
 ### Realist Review
@@ -77,7 +77,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** Different instruments for qualitative vs. quantitative components
 - **Synthesis:** Qualitative (aggregative or interpretive); produces program theory or "realist logic"
 - **Typical use:** Complex social interventions; implementation science; context-sensitive questions
-- **Physician advisor use:** "Why does our readmission reduction program work at Hospital A but not Hospital B?"
+- **Academic physician use:** "Why does our readmission reduction program work at Hospital A but not Hospital B?"
 - **Time estimate:** 4–12 weeks (most iterative; requires theoretical expertise)
 
 ### Critical Review
@@ -86,11 +86,11 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 - **Appraisal:** None required (though methodological critique IS the content)
 - **Synthesis:** Positivist (content analysis) or interpretivist (meta-ethnography)
 - **Typical use:** Academic journals; advancing theoretical debates
-- **Physician advisor use:** Less common; potentially useful for critiquing a payer's evidence basis for a coverage decision
+- **Academic physician use:** Less common; potentially useful for critiquing a payer's evidence basis for a coverage decision
 
 ---
 
-## Physician Advisor Use-Case Mapping
+## Academic Physician Use-Case Mapping
 
 | Use Case | Best Review Type | Why |
 |---|---|---|

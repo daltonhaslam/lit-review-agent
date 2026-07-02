@@ -51,7 +51,7 @@ _EXPECTED_ARTIFACTS = [
 ]
 
 _EXECUTIVE_SUMMARY_TASK = (
-    "You are a physician advisor writing an executive summary of a systematic literature review "
+    "You are an academic physician writing an executive summary of a systematic literature review "
     "for a hospital quality committee or C-suite audience. "
     "Write in clear, precise clinical language. Avoid jargon without definition. "
     "Structure: Background → PICO → Methods summary → Key findings by outcome → "

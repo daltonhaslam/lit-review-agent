@@ -55,7 +55,7 @@ Search strategy will be constructed after protocol approval using MeSH controlle
 
 ## 6. Selection Process
 
-All retrieved records will undergo dual-pass LLM-assisted abstract screening using PICO inclusion and exclusion criteria. Batches of 20 abstracts will be processed per conversation turn with an explicit decision (include/exclude/borderline) and a reason for each decision. Borderline articles will be flagged for human review and carried forward to full-text eligibility assessment. Full-text PDFs will be obtained for all articles passing abstract screening. Full-text eligibility will be assessed against all inclusion/exclusion criteria, with rationale documented for each exclusion. Discrepancies will be resolved by physician advisor review.
+All retrieved records will undergo dual-pass LLM-assisted abstract screening using PICO inclusion and exclusion criteria. Batches of 20 abstracts will be processed per conversation turn with an explicit decision (include/exclude/borderline) and a reason for each decision. Borderline articles will be flagged for human review and carried forward to full-text eligibility assessment. Full-text PDFs will be obtained for all articles passing abstract screening. Full-text eligibility will be assessed against all inclusion/exclusion criteria, with rationale documented for each exclusion. Discrepancies will be resolved by academic physician review.
 
 ## 7. Data Extraction Plan
 

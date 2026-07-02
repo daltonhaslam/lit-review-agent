@@ -294,7 +294,7 @@ Eleven artifacts written to `reviews/{slug}/` on completion:
 
 | File | Format | Audience / Purpose |
 |---|---|---|
-| `executive_summary.md` | Markdown | Physician advisor → C-suite; narrative with inline citations |
+| `executive_summary.md` | Markdown | Academic physician → C-suite; narrative with inline citations |
 | `evidence_table.csv` | CSV | Detailed extraction; import into Excel or Zotero |
 | `prisma_flow.md` | Markdown | PRISMA 2020 flow data (stage counts + exclusion reasons) |
 | `citations.ris` | RIS | Zotero import (included articles only) |

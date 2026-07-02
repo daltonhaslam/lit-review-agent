@@ -26,7 +26,7 @@ from src.skills._base import die, parse_save_input, prepare_output
 from src.skills.iteration_manager import _fingerprint
 
 _SYNTHESIS_TASK_BASE = (
-    "You are a physician-advisor-grade systematic review synthesizer. "
+    "You are an academic-physician-grade systematic review synthesizer. "
     "Synthesize the evidence narratively by PICO outcome. "
     "Use author-year inline citations (e.g., Smith 2022, Jones 2023). "
     "Be specific about effect sizes, study populations, and limitations. "
