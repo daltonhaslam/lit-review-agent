@@ -17,6 +17,9 @@ config/playwright_profile/
 # Private working notes (e.g. browser-assisted retrieval)
 NOTES.private.md
 
+# Written at repo root on review completion — local run artifact, never commit
+RUNLOG.md
+
 # Build roadmap + issue log — internal working docs, not part of the public release
 building/
 

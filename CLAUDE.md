@@ -28,7 +28,7 @@ A Claude Code skill (`/lit-review`) that performs rigorous academic literature r
 **This is the subscription-based version.** All LLM work runs in the Claude Code conversation (covered by Claude.ai Max subscription). Python is a pure data layer — no Anthropic SDK calls.
 
 - **Skill file:** `skills/lit-review.md` → deployed to `~/.claude/skills/lit-review/SKILL.md` (run `make deploy`)
-- **Backend:** `src/skills/*.py` — 18 skill modules (one per stage)
+- **Backend:** `src/skills/*.py` — skill modules (one per stage)
 - **Pattern:** Each LLM skill has `--prepare` (formats data for Claude) and `--save` (writes Claude's output to disk)
 - **APIs:** PubMed, OpenAlex, CrossRef, Semantic Scholar, Europe PMC (no Anthropic API)
 - **State:** `reviews/{slug}/state.json` — authoritative; load at session start

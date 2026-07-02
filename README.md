@@ -77,6 +77,8 @@ Full-text PDFs are needed for eligibility assessment (Stage 10) and data extract
 
 There is no automated paywall-bypass or institutional-proxy integration in this tool — no browser-session replay of any kind. You are responsible for ensuring any full text you obtain is through access you are entitled to.
 
+> **Platform note:** the manual browser-retrieval step (Stage 9.6) and the `make package-deps` helper assume macOS — they use `open -a "Google Chrome"`, `~/Downloads`, and Homebrew. Other platforms will need manual equivalents (e.g. a different browser-launch command, download directory, and package manager).
+
 ---
 
 ## Pipeline Overview
@@ -108,6 +110,7 @@ Every stage writes its output to `reviews/{review-slug}/` immediately, and `stat
 | `executive_summary.md` | Physician-advisor narrative summary (C-suite format) |
 | `prisma_flow.md` | PRISMA 2020 flow diagram with counts |
 | `gap_analysis.md` | Evidence gaps and future research directions |
+| `ai_disclosure.md` | AI-use disclosure — which stages were AI-assisted vs. automated, human checkpoints, limitations |
 | `citations.ris` | Zotero-importable citation file |
 | `citations.bib` | BibTeX for academic writing |
 

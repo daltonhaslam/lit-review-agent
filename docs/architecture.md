@@ -47,25 +47,24 @@ The process is iterative: gap analysis may loop back to Stage 4 for additional s
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 1                                                           │
-│  Stage 1: Review Type Classification (Haiku 4.5)                   │
-│  Stage 2: PICO(S) Formulation (Sonnet 4.6, interactive)            │
-│  ━━━━━━━━━━━━━━━ CHECKPOINT 1: PICO Approval ━━━━━━━━━━━━━━━       │
-│  Stage 3: Protocol Generation (Sonnet 4.6)                         │
-│  ━━━━━━━━━━━━━━━ CHECKPOINT 2: Protocol Approval ━━━━━━━━━━━━━━━   │
+│  Stage 1: Review Type Classification                                │
+│  Stage 2: PICO(S) Formulation (interactive)                         │
+│  ━━━━━━━━━━━━━━━ CHECKPOINT 1: PICO Approval ━━━━━━━━━━━━━━━        │
+│  Stage 3: Protocol Generation                                       │
+│  ━━━━━━━━━━━━━━━ CHECKPOINT 2: Protocol Approval ━━━━━━━━━━━━━━━    │
 └─────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 2                                                           │
-│  Stage 4: Query Construction — MeSH + free-text (Sonnet 4.6)       │
+│  Stage 4: Query Construction — MeSH + free-text                     │
 │  Stage 5: Multi-Source Retrieval (API calls)                        │
 │  Stage 6: Aggregation + Normalization (Python)                      │
 │  Stage 7: Deduplication (Python; PRISMA: identified)                │
-│  [Optional natural break: state saved, session can end]            │
+│  ━━━━━━━━━━━━━━ CHECKPOINT 3: Post-Retrieval Review ━━━━━━━━━━━━━━  │
 └─────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 3                                                           │
 │  Stage 8: Abstract Screening — dual-pass LLM, batched               │
 │           (PRISMA: screened)                                        │
-│  ━━━━━━━━━━━━━━━ CHECKPOINT 3: Borderline Review ━━━━━━━━━━━━━━━   │
 │  Stage 8.5: Citation Chasing — backward + forward (API calls)       │
 │             → new includes appended to screened set                 │
 │  Stage 9: Retrieval List Generation → retrieval_list.csv            │
@@ -85,25 +84,25 @@ The process is iterative: gap analysis may loop back to Stage 4 for additional s
         ↕ NATURAL MULTI-DAY BREAK: hospital library PDF retrieval ↕
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 4                                                           │
-│  Stage 10: Full-Text Eligibility (Sonnet 4.6; PDF uploads)         │
+│  Stage 10: Full-Text Eligibility (PDF uploads)                      │
 │            (PRISMA: eligibility)                                    │
-│  ━━━━━━━━━━━━━━━ CHECKPOINT 5: Included Set Approval ━━━━━━━━━━━━━ │
-│  Stage 11: Data Extraction (Sonnet 4.6)                             │
-│  Stage 12: Enrichment — citations, TLDRs, OA (API calls)           │
+│  ━━━━━━━━━━━━━━━ CHECKPOINT 5: Included Set Approval ━━━━━━━━━━━━━  │
+│  Stage 11: Data Extraction                                          │
+│  Stage 12: Enrichment — citations, TLDRs, OA (API calls)            │
 └─────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 5                                                           │
-│  Stage 13: Quality Appraisal (Sonnet 4.6; instrument per study)    │
-│  Stage 14: Evidence Level Classification (Haiku 4.5; NHMRC I–IV)  │
-│  Stage 15: Gap Analysis (Sonnet 4.6)                               │
-│  ━━━━━━━━━━━━━━━ CHECKPOINT 6: Iteration Decision ━━━━━━━━━━━━━━━  │
+│  Stage 13: Quality Appraisal (instrument per study)                 │
+│  Stage 14: Evidence Level Classification (NHMRC I–IV)               │
+│  Stage 15: Gap Analysis                                             │
+│  ━━━━━━━━━━━━━━━ CHECKPOINT 6: Iteration Decision ━━━━━━━━━━━━━━━   │
 └─────────────────────────────────────────────────────────────────────┘
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 6                                                           │
-│  Stage 16 Step 1: Synthesis (Opus 4.7)                             │
+│  Stage 16 Step 1: Synthesis                                         │
 │             → natural pause here to review the synthesis draft      │
-│  Stage 16 Step 2: Output Package Generation (Opus + Python)        │
-│             → 9 output artifacts written to reviews/{slug}/        │
+│  Stage 16 Step 2: Output Package Generation (Claude + Python)       │
+│             → 9 output artifacts written to reviews/{slug}/         │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -256,7 +255,7 @@ Note: Article lists are stored as separate JSON files (not embedded in state.jso
 |---|---|---|---|---|
 | 1 | PICO Approval | After PICO refinement | Review/edit PICO; approve or request changes | Yes |
 | 2 | Protocol Approval | After protocol generation | Review full protocol; approve to lock it | Yes |
-| 3 | Borderline Screening | After abstract screening | Classify borderline articles (include/exclude) | Yes — and common to wait for library PDFs |
+| 3 | Post-Retrieval Review | After deduplication (Stage 7) | Review PRISMA `identified` count; proceed to abstract screening | Yes |
 | 4 | Library Retrieval Break | After automated + manual PDF download (Stage 9.5/9.6) | Submit `library_request.csv` to hospital library; place PDFs in `pdfs/` | Yes — multi-day break common |
 | 5 | Included Set Approval | After full-text assessment | Confirm or adjust final included set | Yes |
 | 6 | Iteration Decision | After gap analysis | Approve additional iterations or stop | Yes |
@@ -351,7 +350,7 @@ Following Considine et al. (2017): the agent flags papers that use surrogate out
 
 ## 13. Informed by Academic Sources
 
-This architecture is derived from three academic sources in `source_docs/`:
+This architecture is derived from three academic sources: Considine et al. (2017), Paré & Kitsiou (2015), and Blümle et al. (2019).
 
 | Source | Key Contribution |
 |---|---|
