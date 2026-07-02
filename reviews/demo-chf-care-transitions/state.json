@@ -1,0 +1,174 @@
+{
+  "review_id": "demo-chf-care-transitions",
+  "review_type": "systematic",
+  "screening_mode": "thorough",
+  "status": "complete",
+  "raw_question": "What care transition interventions reduce 30-day readmission in CHF?",
+  "pico": {
+    "P": "Adult patients (≥18 years) hospitalized with a primary diagnosis of heart failure (HFrEF, HFpEF, or HFmrEF) being discharged from an acute care hospital",
+    "I": "Care transition interventions initiated at or around hospital discharge, including: early outpatient follow-up (cardiology or primary care within 7–14 days), transitional care models (e.g., Bridge to Home, BOOST), nurse-led or pharmacist-led discharge education, remote monitoring or telemonitoring, post-discharge telephone follow-up, home health visits, patient navigator programs, medication reconciliation programs, and multidisciplinary transitional care teams",
+    "C": "Usual care (standard hospital discharge without a structured care transition program)",
+    "O": [
+      "30-day all-cause hospital readmission rate (primary)",
+      "30-day heart failure–specific readmission rate",
+      "30-day emergency department visit rate",
+      "30-day all-cause mortality",
+      "90-day all-cause readmission rate",
+      "Patient-reported health-related quality of life",
+      "Healthcare costs and resource utilization",
+      "Medication adherence post-discharge",
+      "Time to first post-discharge follow-up appointment"
+    ],
+    "S": "Randomized controlled trials, systematic reviews, meta-analyses, and prospective cohort studies; publication year 2000 onward",
+    "inclusion_criteria": [
+      "Adult patients (≥18 years) with heart failure (any ejection fraction)",
+      "Hospitalized for acute decompensated heart failure or with heart failure as a primary discharge diagnosis",
+      "Intervention initiated at or around hospital discharge (within 7 days of discharge date)",
+      "Reports 30-day readmission or closely related readmission outcome as a primary or secondary endpoint",
+      "Study design: RCT, systematic review, meta-analysis, or prospective observational study",
+      "Full-text available in English",
+      "Published 2000 or later"
+    ],
+    "exclusion_criteria": [
+      "Pediatric populations (<18 years)",
+      "Interventions initiated >7 days post-discharge (chronic disease management without a transition component)",
+      "Studies reporting only inpatient management without a post-discharge follow-up component",
+      "No readmission outcome reported",
+      "Case reports, editorials, letters, narrative commentaries without original data",
+      "Populations dominated by post-transplant or LVAD patients where HF management differs fundamentally",
+      "Non-English language publications"
+    ],
+    "fundamental_four": {
+      "what_we_know": "Primary cardiology follow-up after discharge is important for CHF patients, but it is unclear which specific care transition interventions have true evidence of effectiveness.",
+      "what_we_dont_know": "Which specific care transition interventions would work best at a given community hospital -- the gap is translating evidence to local implementation priorities.",
+      "what_we_should_know": "Which interventions are most effective at reducing 30-day readmission, and how to prioritize them by effectiveness relative to resource requirements and implementation difficulty.",
+      "why_we_should_know": "To decrease readmissions in the CHF population -- evidence will drive intervention selection and program development."
+    },
+    "raw_question": "What care transition interventions reduce 30-day readmission in CHF?"
+  },
+  "queries": {
+    "pubmed": [
+      {
+        "step_number": "#1",
+        "query_string": "\"Heart Failure\"[Mesh] OR \"heart failure\"[tiab] OR \"cardiac failure\"[tiab] OR \"HFrEF\"[tiab] OR \"HFpEF\"[tiab] OR \"HFmrEF\"[tiab]",
+        "database": "pubmed",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498296",
+        "notes": "Population (P) — heart failure MeSH + free-text synonyms",
+        "web_env": null,
+        "query_key": null
+      },
+      {
+        "step_number": "#2",
+        "query_string": "\"Transitional Care\"[Mesh] OR \"Patient Discharge\"[Mesh] OR \"care transition*\"[tiab] OR \"transitional care\"[tiab] OR \"discharge education\"[tiab] OR \"post-discharge\"[tiab] OR \"remote monitoring\"[tiab] OR \"telemonitoring\"[tiab] OR \"telemedicine\"[tiab] OR \"patient navigator*\"[tiab] OR \"medication reconciliation\"[tiab] OR \"home visit*\"[tiab] OR \"home health\"[tiab] OR \"telephone follow-up\"[tiab] OR \"outpatient follow-up\"[tiab] OR \"discharge planning\"[tiab] OR \"nurse-led\"[tiab] OR \"pharmacist-led\"[tiab]",
+        "database": "pubmed",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498407",
+        "notes": "Intervention (I) — transitional care MeSH + free-text",
+        "web_env": null,
+        "query_key": null
+      },
+      {
+        "step_number": "#3",
+        "query_string": "\"Patient Readmission\"[Mesh] OR \"readmission*\"[tiab] OR \"rehospitalization*\"[tiab] OR \"30-day readmission\"[tiab] OR \"hospital readmission\"[tiab]",
+        "database": "pubmed",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498409",
+        "notes": "Outcome (O) — readmission MeSH + free-text",
+        "web_env": null,
+        "query_key": null
+      },
+      {
+        "step_number": "#4",
+        "query_string": "(\"Heart Failure\"[Mesh] OR \"heart failure\"[tiab] OR \"cardiac failure\"[tiab] OR \"HFrEF\"[tiab] OR \"HFpEF\"[tiab] OR \"HFmrEF\"[tiab]) AND (\"Transitional Care\"[Mesh] OR \"Patient Discharge\"[Mesh] OR \"care transition*\"[tiab] OR \"transitional care\"[tiab] OR \"discharge education\"[tiab] OR \"post-discharge\"[tiab] OR \"remote monitoring\"[tiab] OR \"telemonitoring\"[tiab] OR \"telemedicine\"[tiab] OR \"patient navigator*\"[tiab] OR \"medication reconciliation\"[tiab] OR \"home visit*\"[tiab] OR \"home health\"[tiab] OR \"telephone follow-up\"[tiab] OR \"outpatient follow-up\"[tiab] OR \"discharge planning\"[tiab] OR \"nurse-led\"[tiab] OR \"pharmacist-led\"[tiab]) AND (\"Patient Readmission\"[Mesh] OR \"readmission*\"[tiab] OR \"rehospitalization*\"[tiab] OR \"30-day readmission\"[tiab] OR \"hospital readmission\"[tiab]) AND Humans[Mesh] AND English[lang] AND (\"2000\"[dp]:\"3000\"[dp]) AND (\"Randomized Controlled Trial\"[pt] OR \"Systematic Review\"[pt] OR \"Meta-Analysis\"[pt] OR \"Cohort Studies\"[Mesh])",
+        "database": "pubmed",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498410",
+        "notes": "Final flat query — PICO + study design + language + date filters",
+        "web_env": null,
+        "query_key": null
+      }
+    ],
+    "openalex": [
+      {
+        "step_number": "#1",
+        "query_string": "\"heart failure\" AND (\"care transition\" OR \"transitional care\" OR \"post-discharge\" OR \"discharge education\" OR \"telemonitoring\" OR \"patient navigator\" OR \"medication reconciliation\" OR \"home visit\" OR \"telephone follow-up\") AND (\"readmission\" OR \"rehospitalization\")",
+        "database": "openalex",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498521",
+        "notes": null,
+        "web_env": null,
+        "query_key": null
+      }
+    ],
+    "semantic_scholar": [
+      {
+        "step_number": "#1",
+        "query_string": "heart failure care transitions readmission intervention discharge",
+        "database": "semantic_scholar",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498522",
+        "notes": null,
+        "web_env": null,
+        "query_key": null
+      }
+    ],
+    "europepmc": [
+      {
+        "step_number": "#1",
+        "query_string": "(\"heart failure\") AND (\"care transition\" OR \"transitional care\" OR \"post-discharge\" OR \"discharge education\" OR \"telemonitoring\" OR \"patient navigator\" OR \"medication reconciliation\" OR \"telephone follow-up\") AND (\"readmission\" OR \"rehospitalization\") AND (LANG:eng) AND (FIRST_PDATE:[2000 TO 2026])",
+        "database": "europepmc",
+        "hits": null,
+        "timestamp": "2026-04-26T19:37:13.498523",
+        "notes": null,
+        "web_env": null,
+        "query_key": null
+      }
+    ]
+  },
+  "sources_searched": [
+    "pubmed",
+    "openalex",
+    "europepmc"
+  ],
+  "date_range": null,
+  "prisma_counts": {
+    "identified": 120,
+    "screened": 95,
+    "eligibility": 14,
+    "fulltext_assessed": 14,
+    "not_retrieved": 0,
+    "included": 6,
+    "citation_chasing_added": 1,
+    "citation_chasing_borderlines": 0,
+    "citation_chasing_identified": 15,
+    "citation_chasing_screened": 10,
+    "excluded_screening": {
+      "other": 35,
+      "wrong_intervention": 15,
+      "wrong_population": 13,
+      "not_original_research": 9,
+      "wrong_study_design": 6,
+      "wrong_comparator": 3
+    },
+    "excluded_fulltext": {
+      "insufficient outcome data": 5,
+      "wrong intervention timing": 4
+    }
+  },
+  "articles_raw_file": "articles_raw.json",
+  "articles_deduped_file": "articles_deduped.json",
+  "articles_screened_file": "articles_screened.json",
+  "articles_included_file": "articles_included.json",
+  "protocol_locked_at": "2026-06-24T14:20:00Z",
+  "iterations": 0,
+  "max_iterations": 3,
+  "seen_article_ids": [],
+  "packaged": false,
+  "packaged_at": null,
+  "packaged_artifacts": [],
+  "packaged_pandoc_version": null,
+  "packaged_audit_summary": {},
+  "created_at": "2026-06-24T14:00:00Z",
+  "updated_at": "2026-07-02T15:31:09.670820Z"
+}

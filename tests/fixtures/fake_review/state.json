@@ -1,0 +1,8 @@
+{
+  "review_id": "fake-review-2026",
+  "review_type": "systematic",
+  "screening_mode": "thorough",
+  "status": "complete",
+  "raw_question": "Does telemedicine reduce hospital length of stay?",
+  "prisma_counts": {"identified": 100, "screened": 50, "eligibility": 10, "included": 3, "citation_chasing_added": 0}
+}

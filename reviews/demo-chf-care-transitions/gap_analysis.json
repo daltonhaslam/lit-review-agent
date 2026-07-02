@@ -1,0 +1,40 @@
+{
+  "pico_gaps": [
+    {
+      "aspect": "P",
+      "gap": "HFpEF-specific subgroup data are sparse across the included set.",
+      "severity": "medium"
+    },
+    {
+      "aspect": "I",
+      "gap": "Head-to-head comparisons between transition intervention types are absent.",
+      "severity": "high"
+    },
+    {
+      "aspect": "O",
+      "gap": "Medication adherence is rarely reported as a distinct outcome.",
+      "severity": "low"
+    }
+  ],
+  "outcome_gaps": [
+    "30-day ED visit rate reported separately from readmission",
+    "Medication adherence as a distinct measured outcome"
+  ],
+  "population_gaps": [
+    "HFpEF patients analyzed separately from HFrEF",
+    "Frail elderly (age >80) patients"
+  ],
+  "recency_gaps": "Evidence spans 2009-2024; this small demo set skews toward well-cited landmark studies rather than the most recent literature.",
+  "design_gaps": [
+    "Head-to-head RCTs comparing different transition intervention types"
+  ],
+  "suggested_queries": [
+    {
+      "target_gap": "Head-to-head comparative effectiveness of transition models",
+      "query": "(care transitions[tiab] OR transitional care[tiab]) AND heart failure[Mesh] AND (comparative effectiveness[tiab] OR network meta-analysis[tiab]) AND readmission[tiab]",
+      "rationale": "Identify direct comparison RCTs and network meta-analyses ranking transition modalities"
+    }
+  ],
+  "recommendation": "stop",
+  "recommendation_rationale": "This is an illustrative 6-article demo set, not a real completed review; it is included to show the /lit-review output format and is not intended to represent a real gap analysis."
+}

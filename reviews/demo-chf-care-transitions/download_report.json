@@ -1,0 +1,14 @@
+{
+  "downloaded": 6,
+  "not_found": 0,
+  "failed": 0,
+  "sources": {
+    "existing_url": 6,
+    "unpaywall": 0,
+    "openalex": 0,
+    "pmc": 0,
+    "europe_pmc": 0,
+    "crossref": 0
+  },
+  "not_found_list": []
+}

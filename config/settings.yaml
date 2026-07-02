@@ -1,0 +1,10 @@
+max_iterations: 3
+batch_size: 20
+batch_size_fast: 50
+default_sources:
+  - pubmed
+  - openalex
+  - semantic_scholar
+default_year_range: 10
+default_screening_mode: thorough
+default_max_results_per_source: 500

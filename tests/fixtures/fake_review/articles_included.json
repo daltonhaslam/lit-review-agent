@@ -1,0 +1,37 @@
+[
+  {
+    "pmid": "1", "doi": "10.1/a", "title": "Telemedicine reduces LOS in rural EDs",
+    "authors": ["Marcin James P.", "Smith John"], "year": 2023,
+    "journal": "Pediatrics", "volume": "150", "issue": "2", "pages": "e1-e10",
+    "study_design": "rct", "evidence_level": "II", "quality_score": 0.78,
+    "quality_instrument": "RoB 2.0", "sample_size": 696,
+    "tldr": "Telemedicine reduced transfer to tertiary care versus telephone consult (RR 0.93).",
+    "abstract": "Background: rural EDs lack pediatric specialists. Methods: cluster RCT...",
+    "intervention_details": "Real-time pediatric critical-care telemedicine consult.",
+    "comparison_details": "Telephone consult.",
+    "primary_outcomes": ["Transfer rate", "Length of stay", "Cost"],
+    "effect_sizes": "Transfer RR 0.93 (95% CI 0.88-0.99); LOS -2 days; cost -$500/patient.",
+    "author_conclusions": "Telemedicine modestly but reliably reduces inter-facility transfer.",
+    "fulltext_decision": "include", "screening_decision": "include"
+  },
+  {
+    "pmid": "2", "doi": "10.1/b", "title": "Cost evaluation of teleconsult in NICU",
+    "authors": ["Pires Ana"], "year": 2025,
+    "journal": "JAMA Pediatrics",
+    "study_design": "retrospective_cohort", "evidence_level": "III-3", "quality_score": 0.55,
+    "quality_instrument": "STROBE", "sample_size": 790,
+    "tldr": "Mortality fell after daily telerounding.",
+    "intervention_details": "Daily telerounding by tertiary intensivists.",
+    "primary_outcomes": ["Mortality", "Length of stay"],
+    "effect_sizes": "Mortality 20.7% to 10.4% (p<0.001).",
+    "author_conclusions": "Daily telerounding is associated with reduced mortality in resource-limited PICUs.",
+    "fulltext_decision": "include", "screening_decision": "include"
+  },
+  {
+    "pmid": "3", "title": "An editorial on telehealth in 2024",
+    "authors": ["Goetz Matthew"], "year": 2024,
+    "journal": "BMJ",
+    "study_design": "narrative_review", "evidence_level": "IV",
+    "fulltext_decision": "include", "screening_decision": "include"
+  }
+]

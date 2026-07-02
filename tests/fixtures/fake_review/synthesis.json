@@ -1,0 +1,32 @@
+{
+  "review_id": "fake-review-2026",
+  "question": "Does telemedicine reduce hospital length of stay?",
+  "total_included": 3,
+  "narrative": {
+    "by_outcome": [
+      {
+        "outcome": "Transfer rate",
+        "narrative": "Marcin 2023 found a risk ratio of 0.93. Pires 2025 reported lower transfer.",
+        "highest_level": "II",
+        "article_count": 2
+      },
+      {
+        "outcome": "Length of stay",
+        "narrative": "Marcin 2023 reported 2-day LOS reduction.",
+        "highest_level": "II",
+        "article_count": 1
+      },
+      {
+        "outcome": "Cost",
+        "narrative": "Cost outcomes were favorable across studies.",
+        "highest_level": "III-3",
+        "article_count": 0
+      }
+    ],
+    "overall_narrative": "Telemedicine reduces transfers and LOS.",
+    "key_findings": ["RR 0.93 for transfer (Marcin 2023)."],
+    "evidence_quality_summary": "Mixed quality.",
+    "limitations": ["Small evidence base."]
+  },
+  "evidence_map": []
+}

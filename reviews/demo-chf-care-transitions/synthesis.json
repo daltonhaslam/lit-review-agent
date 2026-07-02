@@ -1,0 +1,119 @@
+{
+  "review_id": "demo-chf-care-transitions",
+  "question": "What care transition interventions reduce 30-day readmission in CHF?",
+  "total_included": 6,
+  "narrative": {
+    "by_outcome": [
+      {
+        "outcome": "30-day all-cause hospital readmission rate (primary)",
+        "narrative": "Three of the six included articles bear directly on all-cause readmission. The AHRQ-commissioned Feltner 2014 systematic review and meta-analysis (Annals of Internal Medicine) remains a foundational synthesis of transitional care interventions for heart failure and found that certain intervention types were associated with reduced readmissions. At the individual-trial level, the Cardiolotse RCT (Schuttig 2024, n=2862, BMC Medicine) found that a cardiac care navigator program lowered the rate and length of all-cause rehospitalization compared with standard care. A registry-based cohort (Lee 2016, Medical Care) found that earlier outpatient physician follow-up after discharge was associated with a lower risk of 30-day readmission. Together, this small evidence set is directionally consistent with structured, navigator- or clinician-led transition programs and timely follow-up outperforming unstructured discharge.",
+        "highest_level": "I",
+        "article_count": 3
+      },
+      {
+        "outcome": "30-day heart failure–specific readmission rate",
+        "narrative": "Two articles speak most directly to HF-specific readmission. STRONG-HF (Adamo 2023, n=1077, European Heart Journal) found that a high-intensity post-discharge care strategy with rapid up-titration of guideline-directed medical therapy reduced 180-day HF readmission or death compared with usual care, regardless of baseline NT-proBNP. The Home-HF trial (Dar 2009, European Journal of Heart Failure) compared home telemonitoring with usual specialist care in an elderly HF population and found similar mortality with fewer unplanned HF rehospitalizations and clinic/ED visits in the telemonitoring arm. Both trials point toward active clinical engagement -- medication optimization or monitoring embedded in a care pathway -- rather than passive contact alone.",
+        "highest_level": "II",
+        "article_count": 2
+      }
+    ],
+    "overall_narrative": "This is an illustrative 6-article subset selected from a larger real systematic review on care transition interventions for heart failure, included here only to demonstrate the /lit-review output format. Within this small set, the strongest signal is that structured, clinically active transition models -- a care navigator program (Schuttig 2024), high-intensity GDMT up-titration with close follow-up (Adamo 2023), and telemonitoring embedded in specialist follow-up (Dar 2009) -- are associated with reduced readmission or rehospitalization relative to usual care. A registry-based cohort (Lee 2016) and a foundational AHRQ systematic review (Feltner 2014) provide broader support for the same direction of effect. An overview of systematic reviews (Bashi 2017) situates remote monitoring specifically as most supported for established monitoring programs, while flagging that newer app- and video-based modalities need further study. Because this is a 6-article demo rather than the full underlying review, it should not be read as a complete or current evidence synthesis.",
+    "key_findings": [
+      "Structured, clinically active transition models (care navigator programs, high-intensity GDMT up-titration, specialist-linked telemonitoring) are associated with reduced readmission or rehospitalization relative to usual care across this demo subset.",
+      "A registry-based cohort found that earlier outpatient physician follow-up after discharge was associated with a lower 30-day readmission risk (Lee 2016).",
+      "Telemonitoring evidence in this subset is directionally positive but limited to two sources (Dar 2009 RCT; Bashi 2017 overview of systematic reviews) and should not be generalized without the full evidence base.",
+      "None of the 6 included articles report a directly extractable quantitative effect size for the primary 30-day all-cause readmission outcome; findings are described narratively."
+    ],
+    "evidence_quality_summary": "Evidence quality within this demo subset is mixed by design: it spans one AMSTAR-2-rated systematic review (0.90), one AMSTAR-2-rated overview of systematic reviews (0.75), three RoB-2-rated RCTs (0.75-0.90), and one STROBE-rated prospective cohort (0.72). This is far too small a set to support a real practice recommendation; it is included solely to show what a completed review's quality_report.md and evidence_table.csv look like.",
+    "limitations": [
+      "This is a 6-article illustrative demo derived from a larger real review, not a complete or current systematic review; do not treat its findings as clinical guidance.",
+      "No quantitative pooling was performed and no article in this subset has an extractable structured effect size.",
+      "The demo subset skews toward well-known, open-access, English-language sources and is not representative of the full evidence base on this question.",
+      "PRISMA counts (identified/screened/excluded reasons) in this demo are illustrative placeholder numbers, not a real search record."
+    ]
+  },
+  "evidence_map": [
+    {
+      "outcome": "30-day all-cause hospital readmission rate (primary)",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "30-day heart failure–specific readmission rate",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "30-day emergency department visit rate",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "30-day all-cause mortality",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "90-day all-cause readmission rate",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "Patient-reported health-related quality of life",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "Healthcare costs and resource utilization",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "Medication adherence post-discharge",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    },
+    {
+      "outcome": "Time to first post-discharge follow-up appointment",
+      "by_design": {
+        "SR/MA": 2,
+        "RCT": 3,
+        "Prospective cohort": 1
+      },
+      "total": 6
+    }
+  ],
+  "quantitative_scaffold": []
+}

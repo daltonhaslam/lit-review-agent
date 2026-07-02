@@ -1,0 +1,25 @@
+% LaTeX preamble snippet for /lit-review-package PDF rendering.
+% Loaded via Pandoc's --include-in-header flag, so Pandoc's default template
+% provides all boilerplate (longtable/booktabs, \tightlist, etc.) and this
+% file only layers on customization.
+
+% 1-inch margins for letter paper.
+\usepackage[letterpaper,margin=1in]{geometry}
+
+% Page numbers in the footer; no header rule.
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyfoot[C]{\thepage}
+\renewcommand{\headrulewidth}{0pt}
+
+% Hyperlink styling. Deferred via AtBeginDocument because Pandoc loads
+% hyperref later in its default preamble, after this header is included.
+\AtBeginDocument{
+  \hypersetup{
+    colorlinks=true,
+    linkcolor=black,
+    urlcolor=blue!60!black,
+    citecolor=blue!60!black,
+  }
+}

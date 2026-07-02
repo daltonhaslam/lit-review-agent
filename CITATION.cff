@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+title: lit-review-agent
+message: "If you use this software, please cite it as below."
+type: software
+authors:
+  - family-names: Haslam
+    given-names: Dalton
+    name-suffix: MD MBA
+repository-code: "https://github.com/daltonhaslam/lit-review-agent"
+license: MIT
