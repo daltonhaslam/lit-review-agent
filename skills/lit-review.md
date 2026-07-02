@@ -1389,7 +1389,7 @@ Then run the **Log Run** procedure (see below).
 Run at every safe session break point (Checkpoints 1–6). Appends one line to `RUNLOG.md`.
 
 **Step 1:** Ask the user:
-> "Any issues to note before ending this session? I'll add them to KNOWN_ISSUES.md. Or say 'no issues' to skip."
+> "Any issues to note before ending this session? I'll capture them in the session notes below. Or say 'no issues' to skip."
 
 **Step 2:** Read `state.json` to get `review_id`, `status`, and `raw_question`. Get today's date.
 
@@ -1406,8 +1406,9 @@ Run at every safe session break point (Checkpoints 1–6). Appends one line to `
 - Then append under `### Session notes`:
   `- [{YYYY-MM-DD}] Stage: {status} — {user notes or "no issues"}`
 
-**Step 4:** If issues were noted, append a row to `KNOWN_ISSUES.md`:
-`| {next #} | OPEN | {description} | {review_id} Stage {stage} | — |`
+**Step 4:** If issues were noted and look like a genuine bug or gap (not just a note-to-self),
+tell the user it's captured in the session notes above and suggest they file it as a GitHub issue
+in the repo if they'd like it tracked long-term.
 
 ---
 
@@ -1418,20 +1419,21 @@ the `## {YYYY-MM-DD} — {review_id} [COMPLETE]` block to `RUNLOG.md` — idempo
 PROGRESS block and preserving its `### Session notes`. This procedure only refines the issues/notes.
 
 **Step 1:** Ask:
-> "Any final issues to log in KNOWN_ISSUES.md?"
+> "Any final issues to note for this review?"
 
 **Step 2:** If the user reported issues or notes, re-run the completion writer with them (idempotent —
 it replaces the existing `[COMPLETE]` block in place, preserving session notes):
 ```bash
 python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --save --runlog \
-  --runlog-issues '{KNOWN_ISSUES.md #N, #N or "none"}' \
+  --runlog-issues '{free-text issue summary, or "none"}' \
   --runlog-notes '{any free-text notes from user}' \
   --input-json '{"executive_summary": "{EXECUTIVE_SUMMARY_MARKDOWN}"}'
 ```
 If there were no issues/notes, the baseline block from Stage 16 is already correct — just verify it
 reads `[COMPLETE]` and move on.
 
-**Step 3:** If final issues were noted, append rows to `KNOWN_ISSUES.md`.
+**Step 3:** If final issues were noted and look like a genuine bug or gap, suggest the user file it
+as a GitHub issue in the repo — it's already captured in `RUNLOG.md`'s session notes either way.
 
 ---
 

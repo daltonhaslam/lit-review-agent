@@ -31,7 +31,7 @@ _STATUS_RESUME_HINTS: dict[str, str] = {
 # recorded status has drifted behind the work actually done on disk — typically a
 # status reset during development that was never re-advanced, or a final session
 # whose --save never persisted. scan() surfaces this so a finished review is not
-# silently offered for "resume." See building/KNOWN_ISSUES.md #64.
+# silently offered for "resume."
 _TERMINAL_ARTIFACTS: tuple[str, ...] = ("executive_summary.md", "synthesis.json")
 
 

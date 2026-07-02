@@ -11,8 +11,9 @@ be internally consistent with `state.json`'s `prisma_counts`, not a real search 
 - Duplicate records removed: 25
 - Records screened (title/abstract): 95
 - Records excluded at screening: 81
-- Reports sought for full-text retrieval: 14
-- Reports assessed for eligibility: 14
+- Reports sought for full-text retrieval: 15 (14 from database screening below, plus 1 merged
+  in from the surviving citation-chased candidate — see Citation Chasing section)
+- Reports assessed for eligibility: 15
 - Articles excluded at full-text: 9
 - **Included from database searching: 5**
 
@@ -21,7 +22,12 @@ be internally consistent with `state.json`'s `prisma_counts`, not a real search 
 - Backward (CrossRef references) + forward (Semantic Scholar citations) candidates identified: 15
 - Screened after deduplication: 10
 - Excluded at citation-chase screening: 9
+- 1 surviving candidate merges into full-text assessment above (eligibility/assessed = 15)
 - **New includes from citation chasing: 1**
 - PRISMA `citation_chasing_added`: 1
 
 ## Total Included: 6
+
+_Note: `retrieval_list.csv` in this folder lists only the 6 included articles' download status,
+not all 15 articles sought for full-text — per-article artifacts are trimmed to the included set
+for brevity in this demo (see `protocol.md`)._

@@ -135,8 +135,8 @@
   "prisma_counts": {
     "identified": 120,
     "screened": 95,
-    "eligibility": 14,
-    "fulltext_assessed": 14,
+    "eligibility": 15,
+    "fulltext_assessed": 15,
     "not_retrieved": 0,
     "included": 6,
     "citation_chasing_added": 1,

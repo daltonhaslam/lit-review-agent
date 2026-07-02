@@ -150,7 +150,8 @@ Rate limits enforced by `src/utils/rate_limiter.py` (token bucket, shared across
 
 ## Session Architecture
 
-The pipeline is designed for 4–6 sessions for a full systematic review:
+The pipeline's 6 human checkpoints correspond to up to 6 natural session break points; most
+reviews take about 4–6 sessions for a full systematic review:
 
 | Session | Stages | Natural break |
 |---|---|---|

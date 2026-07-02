@@ -44,6 +44,11 @@ The `review_type_classifier` skill sets this at Stage 1. It cannot be changed af
 
 The process is iterative: gap analysis may loop back to Stage 4 for additional search rounds.
 
+The diagram below groups stages into 6 sessions, one per human checkpoint — the maximal
+breakdown, since each of the 6 checkpoints is a valid session-end point. In practice, most
+reviews take about 4–6 sessions: some users work through two adjacent sessions (e.g., Sessions
+1–2) in one sitting rather than stopping at every checkpoint.
+
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │ SESSION 1                                                           │

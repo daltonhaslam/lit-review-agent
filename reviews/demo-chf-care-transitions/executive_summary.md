@@ -34,7 +34,7 @@ first post-discharge follow-up
 ## Methods Summary
 
 For this demo, a small illustrative search funnel (120 records identified, 95 screened after
-deduplication, 14 assessed at full text, 6 included — 5 from database searching and 1 via
+deduplication, 15 assessed at full text, 6 included — 5 from database searching and 1 via
 citation chasing) stands in for a real search. The 6 included articles span 2009–2024 and include
 1 AHRQ-commissioned systematic review, 1 overview of systematic reviews, 3 RCTs, and 1 prospective
 cohort. Quality appraisal used AMSTAR-2 (systematic reviews), RoB-2 (RCTs), and STROBE (the cohort

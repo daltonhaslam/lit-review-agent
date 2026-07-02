@@ -32,10 +32,10 @@
 
 ## Eligibility
 
-- Reports sought for full-text retrieval: **14**
+- Reports sought for full-text retrieval: **15**
   - (includes articles from both streams)
 - Reports not retrieved (no PDF available): **0**
-- Reports assessed for eligibility: **14**
+- Reports assessed for eligibility: **15**
 - Articles excluded at full-text: **9**
   - insufficient outcome data: 5
   - wrong intervention timing: 4
@@ -63,9 +63,9 @@ SCREENING (Stream 1)
   Records excluded: 81
         |
 ELIGIBILITY (both streams combined)
-  Sought for retrieval: 14
+  Sought for retrieval: 15
   Not retrieved (no PDF): 0
-  Assessed: 14
+  Assessed: 15
   Excluded: 9
         |
 INCLUDED

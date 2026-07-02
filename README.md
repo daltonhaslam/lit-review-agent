@@ -54,7 +54,7 @@ Open Claude Code in this project directory and invoke one of:
 
 | Skill | Use case |
 |---|---|
-| `/lit-review` | Full systematic review — PICO through output package, 6 checkpoints, typically 3–5 sessions |
+| `/lit-review` | Full systematic review — PICO through output package, 6 checkpoints (up to 6 natural session breaks); most reviews take about 4–6 sessions |
 | `/lit-review-quick` | Rapid scoping scan — skips full-text eligibility, quality appraisal, and citation chasing; narrative summary + evidence map from abstract screening only |
 | `/lit-review-update` | Re-run retrieval on an existing completed review, screen only new articles, and merge new includes into the existing outputs |
 | `/lit-review-package` | Bundle a completed review's outputs into a single polished PDF + DOCX deliverable |
