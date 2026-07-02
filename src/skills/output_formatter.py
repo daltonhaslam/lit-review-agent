@@ -278,7 +278,7 @@ def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
     lines = [
         "# AI-Assisted Review Disclosure (PRISMA-trAIce)",
         "",
-        "**Tool:** Claude Code / claude-sonnet-4-6 (Anthropic, 2026)",
+        "**Tool:** Claude (Anthropic), via Claude Code and the lit-review-agent skill",
         f"**Review type:** {review_type}",
         f"**Completed:** {now}",
         "",
@@ -324,8 +324,8 @@ def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
         "- Effect size extraction relies on abstract-level data for articles without PDF",
         "- AI screening decisions are not independently verifiable from the published artifact; "
         "decisions and rationales are stored in `articles_screened.json`",
-        "- Citation-chased articles may have incomplete metadata if the citation-chase "
-        "sub-pipeline (Stages 9.5b–13b) was not run",
+        "- Citation-chased articles (added at Stage 8.5) may have incomplete metadata "
+        "compared to database-retrieved articles",
     ]
 
     (review_dir / "ai_disclosure.md").write_text("\n".join(lines), encoding="utf-8")
