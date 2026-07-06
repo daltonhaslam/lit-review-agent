@@ -25,3 +25,6 @@ building/
 # Reviews are local work product. Ignore ALL of them; whitelist only the demo.
 reviews/*
 !reviews/demo-*/
+
+# Compass local working marker — never publish
+.project-status
