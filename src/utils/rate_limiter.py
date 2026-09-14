@@ -2,7 +2,15 @@ from __future__ import annotations
 
 import asyncio
 import time
+from datetime import datetime, timezone
+from email.utils import parsedate_to_datetime
 from typing import Any, Callable
+
+import httpx
+
+# Cap on a server-requested Retry-After: retrieval runs interactively, so one saturated
+# source must not hold the whole run for minutes (3 retries × cap = worst case).
+MAX_RETRY_AFTER_SECONDS = 30.0
 
 
 class RateLimiter:
@@ -43,14 +51,39 @@ class RateLimiter:
             try:
                 return await func()
             except Exception as exc:
-                msg = str(exc)
-                is_rate = "429" in msg or "rate" in msg.lower()
-                is_server = "503" in msg or "502" in msg or "500" in msg
-                if (is_rate or is_server) and attempt < max_retries:
-                    delay = base_delay * (2 ** attempt)
-                    await asyncio.sleep(delay)
-                else:
+                if not _is_transient(exc) or attempt >= max_retries:
                     raise
+                delay = _retry_after_seconds(exc)
+                if delay is None:
+                    delay = base_delay * (2 ** attempt)
+                await asyncio.sleep(delay)
+
+
+def _is_transient(exc: Exception) -> bool:
+    """429 or 5xx — worth retrying. Transport errors (timeouts, refused connections) are
+    not retried: the PDF downloader runs this over hundreds of hosts with a 60 s timeout."""
+    if not isinstance(exc, httpx.HTTPStatusError):
+        return False
+    code = exc.response.status_code
+    return code == 429 or 500 <= code < 600
+
+
+def _retry_after_seconds(exc: Exception) -> float | None:
+    """Delay requested by a Retry-After header (delay-seconds or HTTP-date), clamped to
+    [0, MAX_RETRY_AFTER_SECONDS]; None if absent or unparseable."""
+    if not isinstance(exc, httpx.HTTPStatusError):
+        return None
+    raw = exc.response.headers.get("Retry-After")
+    if not raw:
+        return None
+    try:
+        seconds = float(raw)
+    except ValueError:
+        try:
+            seconds = (parsedate_to_datetime(raw) - datetime.now(timezone.utc)).total_seconds()
+        except (TypeError, ValueError):
+            return None
+    return max(0.0, min(seconds, MAX_RETRY_AFTER_SECONDS))
 
 
 # Shared limiters — one per host, imported by each client

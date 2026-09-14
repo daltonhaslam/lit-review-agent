@@ -13,6 +13,7 @@ import httpx
 
 from ..models.article import Article
 from ..utils.rate_limiter import LIMITERS, RateLimiter
+from .errors import SourceRetrievalError
 
 BASE_URL = "https://www.ebi.ac.uk/europepmc/webservices/rest"
 LIMITER = LIMITERS["www.ebi.ac.uk"]
@@ -61,8 +62,8 @@ class EuropePMCClient:
                         },
                     )
                 )
-            except Exception:
-                break
+            except Exception as exc:
+                raise SourceRetrievalError.from_exception("europepmc", exc, articles) from exc
 
             results = (data.get("resultList") or {}).get("result") or []
             for r in results:

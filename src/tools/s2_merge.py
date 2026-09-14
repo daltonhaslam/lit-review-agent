@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.agent import state as state_manager
 from src.integrations.config import load_api_config
+from src.integrations.errors import SourceRetrievalError
 from src.integrations.semantic_scholar_client import SemanticScholarClient
 
 
@@ -42,7 +43,15 @@ async def _run(review_dir: Path, year_from: int, max_results: int) -> None:
     print(f"Key   : {'set' if cfg.semantic_scholar_api_key else 'NOT SET'}", file=sys.stderr)
 
     client = SemanticScholarClient(api_key=cfg.semantic_scholar_api_key)
-    new_articles = await client.search(query, max_results=max_results, year_range=year_range)
+    try:
+        new_articles = await client.search(query, max_results=max_results, year_range=year_range)
+    except SourceRetrievalError as exc:
+        print(f"S2 DEGRADED: {exc}", file=sys.stderr)
+        if not exc.partial:
+            print(json.dumps({"error": str(exc), "s2_fetched": 0, "added": 0}))
+            sys.exit(1)
+        new_articles = exc.partial
+        print(f"Keeping {len(new_articles)} partial results", file=sys.stderr)
     print(f"S2 returned: {len(new_articles)} articles", file=sys.stderr)
 
     raw_path = review_dir / review.articles_raw_file

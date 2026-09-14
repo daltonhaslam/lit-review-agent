@@ -5,6 +5,6 @@ ncbi_api_key: ""              # Free at https://www.ncbi.nlm.nih.gov/account/ (r
 openalex_email: ""            # Any email — joins OpenAlex's polite pool
 crossref_mailto: ""           # Any email — joins CrossRef's polite pool
 unpaywall_email: ""           # Any email — required by the Unpaywall API for open-access lookups
-semantic_scholar_api_key: ""  # Optional; leave blank to use the unauthenticated pool
+semantic_scholar_api_key: ""  # Recommended — the unauthenticated pool is often rate-limited (429); free at https://www.semanticscholar.org/product/api. Env: SEMANTIC_SCHOLAR_API_KEY
 
 report_author: ""             # Your name as it should appear on generated reports (e.g. "Jane Smith, MD"). Blank = "Prepared using lit-review-agent".

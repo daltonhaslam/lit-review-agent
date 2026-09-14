@@ -168,7 +168,7 @@ ncbi_api_key: ""
 openalex_email: ""
 crossref_mailto: ""
 unpaywall_email: ""
-semantic_scholar_api_key: ""    # Optional; blank = unauthenticated
+semantic_scholar_api_key: ""    # Recommended; blank = unauthenticated pool (often 429-limited)
 report_author: ""               # Your name on generated reports; blank = "Prepared using lit-review-agent"
 ```
 

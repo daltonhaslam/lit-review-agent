@@ -141,7 +141,7 @@ Each additional iteration: ~$0.50–$1.00.
 | PubMed (NCBI) | 10 req/s with key | Token bucket; 3 req/s without key |
 | OpenAlex | ~10 req/s (polite pool) | Set OPENALEX_EMAIL env var |
 | CrossRef | 10 req/s (polite pool) | Set CROSSREF_MAILTO env var |
-| Semantic Scholar | 1 req/s without key; 10 req/s with key | Set S2_API_KEY for higher throughput |
+| Semantic Scholar | shared pool without key (frequently 429); 1 req/s with key | Set SEMANTIC_SCHOLAR_API_KEY; without it the source may be reported as degraded |
 | Europe PMC | ~5 req/s | No auth required |
 
 Rate limits enforced by `src/utils/rate_limiter.py` (token bucket, shared across all clients).

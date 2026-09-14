@@ -165,7 +165,7 @@ CrossRef is the authoritative source for DOI normalization. Use it to resolve va
 Provides data not available elsewhere: AI-generated TLDRs (~50-word summaries), SPECTER2 paper embeddings (for similarity ranking), and influential-citation flag (distinguishes highly-cited from methodologically influential papers). Batch endpoints make enrichment cheap.
 
 ### Auth
-API keys no longer issued to free-email accounts (tightened in 2025). Design for unauthenticated operation as default. Institutional email holders may apply. If no key: use shared unauthenticated pool (practical rate: ~3 req/s sustained).
+A key is free at https://www.semanticscholar.org/product/api (approval can take a few days; institutional email helps). Set `semantic_scholar_api_key` in `config/api_keys.yaml` or `SEMANTIC_SCHOLAR_API_KEY` in the environment. Without a key the client uses the shared unauthenticated pool, which answers HTTP 429 for long stretches (observed 2026-09: three consecutive requests, all 429, no `Retry-After`). The search client retries 3× with backoff (2–8 s, or the Retry-After header when sent) and then raises `SourceRetrievalError`; `multi_source_retriever` reports the source as **degraded** with partial hits kept, instead of recording a silent zero.
 
 ### Key Endpoints
 
@@ -278,9 +278,9 @@ class RateLimiter:
         # Blocks until a token is available
     
     @staticmethod
-    async def retry_with_backoff(func, max_retries=3):
-        # On 429: exponential backoff (1s, 2s, 4s)
-        # On 503: retry after Retry-After header
+    async def retry_with_backoff(func, max_retries=3, base_delay=1.0):
+        # On 429 / 5xx (checked by HTTP status): honor Retry-After if present (delay-seconds or HTTP-date, capped 30 s),
+        # else exponential backoff base_delay * 2**attempt. Re-raises once retries are exhausted.
 ```
 
 ### Per-Host Budgets
@@ -318,8 +318,8 @@ export OPENALEX_EMAIL="your@email.com"
 export CROSSREF_MAILTO="your@email.com"
 export UNPAYWALL_EMAIL="your@email.com"
 
-# Optional (Semantic Scholar key; hard to obtain without institutional affiliation)
-export S2_API_KEY="your_s2_key"
+# Recommended (Semantic Scholar key; the unauthenticated pool is often 429-limited)
+export SEMANTIC_SCHOLAR_API_KEY="your_s2_key"   # legacy name S2_API_KEY still honored
 ```
 
 Or store in `config/api_keys.yaml` (not committed):

@@ -21,6 +21,7 @@ def _reverse_name(name: str) -> str:
         return f"{parts[-1]} {' '.join(parts[:-1])}"
     return name
 from ..utils.rate_limiter import LIMITERS, RateLimiter
+from .errors import SourceRetrievalError
 
 BASE_URL = "https://api.openalex.org"
 LIMITER = LIMITERS["api.openalex.org"]
@@ -76,8 +77,8 @@ class OpenAlexClient:
                 data = await RateLimiter.retry_with_backoff(
                     lambda: self._get("/works", self._params(extra))
                 )
-            except Exception:
-                break
+            except Exception as exc:
+                raise SourceRetrievalError.from_exception("openalex", exc, articles) from exc
 
             results = data.get("results", [])
             for work in results:

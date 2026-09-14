@@ -1,6 +1,7 @@
 """Unit tests for rate limiter (Phase 0)."""
 import asyncio
 import time
+import httpx
 import pytest
 
 from src.utils.rate_limiter import RateLimiter, LIMITERS
@@ -43,6 +44,13 @@ async def test_retry_succeeds_on_first_try():
     assert len(calls) == 1
 
 
+def _status_error(status: int) -> httpx.HTTPStatusError:
+    request = httpx.Request("GET", "https://example.org")
+    return httpx.HTTPStatusError(
+        "rate limited", request=request, response=httpx.Response(status, request=request)
+    )
+
+
 @pytest.mark.asyncio
 async def test_retry_retries_on_rate_limit_error():
     attempts = []
@@ -50,7 +58,7 @@ async def test_retry_retries_on_rate_limit_error():
     async def fails_then_succeeds():
         attempts.append(1)
         if len(attempts) < 3:
-            raise Exception("429 rate limit exceeded")
+            raise _status_error(429)
         return "ok"
 
     result = await RateLimiter.retry_with_backoff(
@@ -63,9 +71,9 @@ async def test_retry_retries_on_rate_limit_error():
 @pytest.mark.asyncio
 async def test_retry_raises_after_max_retries():
     async def always_fails():
-        raise Exception("429 rate limit")
+        raise _status_error(429)
 
-    with pytest.raises(Exception, match="429"):
+    with pytest.raises(httpx.HTTPStatusError):
         await RateLimiter.retry_with_backoff(always_fails, max_retries=2, base_delay=0.01)
 
 

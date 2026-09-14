@@ -40,11 +40,13 @@ ncbi_api_key: ""              # Free at https://www.ncbi.nlm.nih.gov/account/ (r
 openalex_email: ""            # Any email — joins OpenAlex's polite pool
 crossref_mailto: ""           # Any email — joins CrossRef's polite pool
 unpaywall_email: ""           # Any email — required by the Unpaywall API for open-access lookups
-semantic_scholar_api_key: ""  # Optional; leave blank to use the unauthenticated pool
+semantic_scholar_api_key: ""  # Recommended — the unauthenticated pool is often rate-limited (429); free at semanticscholar.org/product/api
 report_author: ""             # Your name as it should appear on generated reports (e.g. "Jane Smith, MD"). Blank = "Prepared using lit-review-agent".
 ```
 
-All keys except `report_author` can also be set as environment variables: `NCBI_API_KEY`, `OPENALEX_EMAIL`, `CROSSREF_MAILTO`, `UNPAYWALL_EMAIL`, `S2_API_KEY`. None of these are required to run a review — they raise rate limits and add polite-pool access, but every source works unauthenticated too.
+All keys except `report_author` can also be set as environment variables: `NCBI_API_KEY`, `OPENALEX_EMAIL`, `CROSSREF_MAILTO`, `UNPAYWALL_EMAIL`, `SEMANTIC_SCHOLAR_API_KEY` (the older `S2_API_KEY` name still works). None of these are required to run a review — they raise rate limits and add polite-pool access, and every source falls back to unauthenticated access.
+
+**Semantic Scholar caveat:** the shared unauthenticated pool answers HTTP 429 for long stretches. Without a key, retrieval retries with backoff and, if the pool stays saturated, reports Semantic Scholar as a *degraded source* in the retrieval summary (`degraded_sources` / `source_status`) and in `search_log.md` rather than recording a silent zero. A free key from https://www.semanticscholar.org/product/api removes the problem.
 
 ---
 

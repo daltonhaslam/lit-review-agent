@@ -102,6 +102,8 @@ python -m src.skills.multi_source_retriever \
   --max-per-source 150
 ```
 
+Show the per-source counts with their `source_status` (`ok` / `empty` / `degraded`). If `degraded_sources` is non-empty, surface each `retrieval_errors` message and ask whether to fix and re-run that source (Semantic Scholar 429 → set `semantic_scholar_api_key` in `config/api_keys.yaml`) or proceed and note the limitation in the summary. Never proceed silently past a degraded source.
+
 Followed by aggregation and deduplication:
 
 ```bash

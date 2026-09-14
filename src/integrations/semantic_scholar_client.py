@@ -14,6 +14,21 @@ import httpx
 from rapidfuzz import fuzz
 
 from ..models.article import Article
+from ..utils.rate_limiter import LIMITERS, RateLimiter
+from .errors import SourceRetrievalError
+
+BASE_URL = "https://api.semanticscholar.org/graph/v1"
+LIMITER = LIMITERS["api.semanticscholar.org"]
+
+# The unauthenticated pool is shared by every anonymous caller and answers 429 for long
+# stretches, so the search loop backs off longer than the other clients (2+4+8 s) before
+# giving up and reporting the source as degraded.
+SEARCH_MAX_RETRIES = 3
+SEARCH_BASE_DELAY = 2.0
+UNAUTHENTICATED_429_HINT = (
+    " (unauthenticated pool) — get a free key at semanticscholar.org/product/api and set "
+    "semantic_scholar_api_key in config/api_keys.yaml"
+)
 
 
 def _reverse_name(name: str) -> str:
@@ -21,10 +36,6 @@ def _reverse_name(name: str) -> str:
     if len(parts) >= 2:
         return f"{parts[-1]} {' '.join(parts[:-1])}"
     return name
-from ..utils.rate_limiter import LIMITERS, RateLimiter
-
-BASE_URL = "https://api.semanticscholar.org/graph/v1"
-LIMITER = LIMITERS["api.semanticscholar.org"]
 
 PAPER_FIELDS = (
     "paperId,externalIds,title,abstract,authors,year,venue,"
@@ -86,10 +97,17 @@ class SemanticScholarClient:
                             "offset": o,
                             **({"year": year_param} if year_param else {}),
                         },
-                    )
+                    ),
+                    max_retries=SEARCH_MAX_RETRIES,
+                    base_delay=SEARCH_BASE_DELAY,
                 )
-            except Exception:
-                break
+            except Exception as exc:
+                raise SourceRetrievalError.from_exception(
+                    "semantic_scholar",
+                    exc,
+                    articles,
+                    hint=self._hint_for(exc),
+                ) from exc
 
             for paper in data.get("data") or []:
                 article = _parse_s2_paper(paper)
@@ -103,6 +121,10 @@ class SemanticScholarClient:
             await asyncio.sleep(1.2)  # S2 rate limit is stricter than others
 
         return articles[:max_results]
+
+    def _hint_for(self, exc: Exception) -> str:
+        is_429 = isinstance(exc, httpx.HTTPStatusError) and exc.response.status_code == 429
+        return UNAUTHENTICATED_429_HINT if is_429 and not self._api_key else ""
 
     async def batch_lookup(self, paper_ids: list[str]) -> list[Article]:
         """Enrich up to 500 papers per call using the batch endpoint.

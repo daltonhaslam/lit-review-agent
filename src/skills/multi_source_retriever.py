@@ -21,6 +21,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.agent import state as state_manager
 from src.integrations.config import load_api_config
+from src.integrations.errors import SourceRetrievalError
 from src.integrations.europepmc_client import EuropePMCClient
 from src.integrations.openalex_client import OpenAlexClient
 from src.integrations.pubmed_client import PubMedClient
@@ -93,29 +94,39 @@ async def retrieve(
     all_articles: list[Article] = []
     by_source: dict[str, int] = {}
     errors: dict[str, str] = {}
+    # A degraded source failed (rate limit, server, network) rather than matching nothing;
+    # its count is whatever it managed before failing. Message keyed by source label.
+    degraded: dict[str, str] = {}
 
     for label, result in zip(task_labels, results):
         if isinstance(result, Exception):
-            by_source[label] = 0
-            errors[label] = str(result)
+            if not isinstance(result, SourceRetrievalError):
+                result = SourceRetrievalError.from_exception(label, result)
+            articles = result.partial
+            degraded[label] = f"DEGRADED: {result}"
+            errors[label] = degraded[label]
         else:
-            articles: list[Article] = result
-            by_source[label] = len(articles)
-            all_articles.extend(articles)
-            if len(articles) == 0 and label not in errors:
+            articles = result
+            if not articles:
                 errors[label] = (
-                    f"WARNING: {label} returned 0 results — query may be too specific, "
-                    f"syntactically invalid, or rate-limited. "
-                    f"Inspect the query in state.queries.{label}."
+                    f"WARNING: {label} returned 0 results — query may be too specific "
+                    f"or syntactically invalid. Inspect the query in state.queries.{label}."
                 )
+        by_source[label] = len(articles)
+        all_articles.extend(articles)
+
+    source_status = {
+        label: "degraded" if label in degraded else ("ok" if by_source[label] else "empty")
+        for label in task_labels
+    }
 
     articles_raw_path = review_dir / review.articles_raw_file
     articles_raw_path.write_text(
         json.dumps([a.model_dump(mode="json") for a in all_articles], indent=2)
     )
 
-    _write_hits_to_queries(review, by_source)
-    _write_search_log(review, review_dir, by_source, sources)
+    _write_hits_to_queries(review, by_source, degraded)
+    _write_search_log(review, review_dir, by_source, sources, degraded)
 
     review.status = ReviewStatus.retrieved
     review.sources_searched = sources
@@ -124,6 +135,8 @@ async def retrieve(
     return {
         "total": len(all_articles),
         "by_source": by_source,
+        "source_status": source_status,
+        "degraded_sources": list(degraded),
         "retrieval_errors": errors,
         "articles_raw_file": str(articles_raw_path),
     }
@@ -137,15 +150,25 @@ _DB_DISPLAY_NAMES: dict[str, str] = {
 }
 
 
-def _write_hits_to_queries(review, by_source: dict[str, int]) -> None:
+def _write_hits_to_queries(
+    review, by_source: dict[str, int], degraded: dict[str, str] | None = None
+) -> None:
     for source in ("pubmed", "openalex", "semantic_scholar", "europepmc"):
         queries = getattr(review.queries, source)
         if source in by_source and queries:
             queries[-1].hits = by_source[source]
+            if degraded and source in degraded:
+                # Append: notes already holds the query-construction rationale from Stage 4.
+                existing = queries[-1].notes
+                queries[-1].notes = f"{existing} | {degraded[source]}" if existing else degraded[source]
 
 
 def _write_search_log(
-    review, review_dir: Path, by_source: dict[str, int], sources: list[str] | None = None
+    review,
+    review_dir: Path,
+    by_source: dict[str, int],
+    sources: list[str] | None = None,
+    degraded: dict[str, str] | None = None,
 ) -> None:
     date_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     # Use the sources actually searched this run; review.sources_searched is only assigned
@@ -166,6 +189,7 @@ def _write_search_log(
         for q in review.queries.pubmed:
             lines.append(f"- {q.step_number}: `{q.query_string}`")
         lines.append(f"- Articles retrieved: {by_source['pubmed']}")
+        _append_degraded_line(lines, "pubmed", degraded)
         lines.append("")
 
     for db in ("openalex", "semantic_scholar", "europepmc"):
@@ -177,9 +201,18 @@ def _write_search_log(
         if queries:
             lines.append(f"- Query: `{queries[0].query_string}`")
         lines.append(f"- Articles retrieved: {by_source[db]}")
+        _append_degraded_line(lines, db, degraded)
         lines.append("")
 
     (review_dir / "search_log.md").write_text("\n".join(lines), encoding="utf-8")
+
+
+def _append_degraded_line(lines: list[str], source: str, degraded: dict[str, str] | None) -> None:
+    if degraded and source in degraded:
+        lines.append(
+            f"- **{degraded[source]}** (count above is partial or zero because the source "
+            "failed, not because nothing matched)"
+        )
 
 
 async def _search_pubmed(

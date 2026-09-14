@@ -295,23 +295,25 @@ python3 -m src.skills.multi_source_retriever \
 
 Add `--year-from YYYY --year-to YYYY` if a year range was specified in the protocol.
 
-Display results:
+Display results — always the per-source table, with the `source_status` value beside each count (`ok` / `empty` / `degraded`):
 > **Retrieval complete.**
 >
-> | Source | Records retrieved |
-> |---|---|
-> | PubMed | {by_source.pubmed} |
-> | OpenAlex | {by_source.openalex} |
-> | Semantic Scholar | {by_source.semantic_scholar} |
-> | **Total (pre-dedup)** | {total} |
+> | Source | Records retrieved | Status |
+> |---|---|---|
+> | PubMed | {by_source.pubmed} | {source_status.pubmed} |
+> | OpenAlex | {by_source.openalex} | {source_status.openalex} |
+> | Semantic Scholar | {by_source.semantic_scholar} | {source_status.semantic_scholar} |
+> | **Total (pre-dedup)** | {total} | |
 
-If `retrieval_errors` contains any entries, surface them to the user before proceeding:
-> ⚠️ **{source}** returned 0 results with error: `{error}`
-> Check `config/api_keys.yaml` or retry.
+If `degraded_sources` is non-empty, the run is **not** a clean search — say so explicitly and show each message from `retrieval_errors`:
+> ⚠️ **Degraded source: {source}** — `{retrieval_errors[source]}`
+> The count above is partial or zero because the source failed, not because nothing matched. `search_log.md` records the degradation.
 
-For Semantic Scholar specifically: the free tier rate-limits quickly on large queries. If you see a 429 error, instruct the user to obtain a free API key at semanticscholar.org/product/api and add it as `semantic_scholar_api_key` in `config/api_keys.yaml`.
+Then ask the user whether to (a) fix and re-run retrieval for that source (for Semantic Scholar 429: obtain a free key at semanticscholar.org/product/api, set `semantic_scholar_api_key` in `config/api_keys.yaml`, re-run the same command), or (b) proceed and note the degraded source as a search limitation in the report. Do not proceed silently.
 
-Then automatically proceed to Stage 6.
+An `empty` source (0 hits, no failure) only gets its `retrieval_errors` WARNING shown — the query may be too specific; no re-run is required.
+
+When nothing is degraded, automatically proceed to Stage 6.
 
 ---
 
@@ -1451,7 +1453,7 @@ as a GitHub issue in the repo — it's already captured in `RUNLOG.md`'s session
 NCBI_API_KEY             — required for Stage 4 (query_builder MeSH lookup) and Stage 5 (PubMed retrieval)
 OPENALEX_EMAIL           — recommended for Stage 5 (polite pool; higher rate limits)
 CROSSREF_MAILTO          — recommended for Stage 6 (polite pool)
-S2_API_KEY               — optional for Stage 5 (Semantic Scholar; higher rate limit without key)
+SEMANTIC_SCHOLAR_API_KEY — recommended for Stage 5 (Semantic Scholar; the unauthenticated pool is often 429-limited). Legacy name S2_API_KEY still honored.
 ```
 
 All LLM work runs in the Claude Code conversation (Claude.ai Max subscription). No ANTHROPIC_API_KEY needed.
