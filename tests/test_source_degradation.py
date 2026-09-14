@@ -310,6 +310,22 @@ class TestRetrieverRunSummary:
         assert notes.startswith("Stage 4 rationale")
         assert "429" in notes
 
+    async def test_rerun_does_not_duplicate_degradation_note(self, tmp_path):
+        from src.skills.multi_source_retriever import retrieve
+
+        _, review_dir = _make_review(tmp_path)
+        patches = (
+            patch("src.skills.multi_source_retriever._search_pubmed", new=AsyncMock(return_value=[])),
+            patch("src.skills.multi_source_retriever._search_openalex", new=AsyncMock(return_value=[])),
+            patch("src.skills.multi_source_retriever._search_semantic_scholar",
+                  new=AsyncMock(side_effect=_degraded())),
+        )
+        for _ in range(2):
+            with patches[0], patches[1], patches[2]:
+                await retrieve(review_dir, sources=["pubmed", "openalex", "semantic_scholar"])
+        notes = state_manager.load(review_dir).queries.semantic_scholar[-1].notes
+        assert notes.count("DEGRADED") == 1
+
     async def test_unwrapped_exception_is_still_reported_as_degraded(self, tmp_path):
         """PubMed raises raw httpx errors; they must get the same degraded treatment."""
         from src.skills.multi_source_retriever import retrieve

@@ -159,8 +159,10 @@ def _write_hits_to_queries(
             queries[-1].hits = by_source[source]
             if degraded and source in degraded:
                 # Append: notes already holds the query-construction rationale from Stage 4.
-                existing = queries[-1].notes
-                queries[-1].notes = f"{existing} | {degraded[source]}" if existing else degraded[source]
+                # Skip if a re-run already recorded this exact degradation.
+                existing = queries[-1].notes or ""
+                if degraded[source] not in existing:
+                    queries[-1].notes = f"{existing} | {degraded[source]}" if existing else degraded[source]
 
 
 def _write_search_log(
