@@ -179,3 +179,28 @@ class TestBuildSeenIds:
         assert isinstance(seen, set)
 
 
+
+
+class TestRetrieveForQueriesConfig:
+    """Regression: --retrieve passed the APIConfig dataclass to code that called
+    cfg.get(...), so Checkpoint 6 iteration and /lit-review-update crashed with
+    AttributeError before any request was made."""
+
+    async def test_accepts_api_config_and_passes_ncbi_key(self):
+        from unittest.mock import AsyncMock, patch
+
+        from src.integrations.config import APIConfig
+        from src.skills.iteration_manager import _retrieve_for_queries
+
+        article = Article(pmid="999", title="New iteration hit", source_dbs=["pubmed"])
+        with patch("src.skills.iteration_manager.PubMedClient") as client_cls:
+            client = client_cls.return_value
+            client.search = AsyncMock(return_value={"pmids": ["999"]})
+            client.fetch_abstracts = AsyncMock(return_value=[article])
+            new, hits, _ = await _retrieve_for_queries(
+                APIConfig(ncbi_api_key="ncbi-key"), ["heart failure"], set()
+            )
+
+        client_cls.assert_called_once_with("ncbi-key")
+        assert [a.pmid for a in new] == ["999"]
+        assert hits == {"heart failure": 1}
