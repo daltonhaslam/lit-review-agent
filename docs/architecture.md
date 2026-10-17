@@ -7,7 +7,7 @@ _Last updated: May 2026_
 
 The Lit Review Agent is a Claude Code skill that replicates the rigor of a professional academic librarian conducting a systematic literature review. It consists of three layers:
 
-- **Skill layer** (`~/.claude/skills/lit-review.md`) — orchestrates the conversational workflow; loaded when user invokes `/lit-review`
+- **Skill layer** (`~/.claude/skills/lit-review/SKILL.md`) — orchestrates the conversational workflow; loaded when user invokes `/lit-review`
 - **Python backend** (`src/`) — pure data layer; handles API calls, file I/O, and data formatting. No LLM calls — no Anthropic SDK dependency.
 - **File-based state** (`reviews/{slug}/state.json`) — authoritative source of truth; enables session resumption without conversation history
 
@@ -25,18 +25,18 @@ The Lit Review Agent is a Claude Code skill that replicates the rigor of a profe
 
 ## 2. Review Type Classification (First-Class Architectural Concept)
 
-Review type is determined **before** query generation because it controls search coverage strategy, appraisal instruments, and synthesis method. Drawn from Paré & Kitsiou (2015, Handbook of eHealth Evaluation).
+Review type is determined **before** query generation because it shapes the Claude-written protocol and queries. Drawn from Paré & Kitsiou (2015, Handbook of eHealth Evaluation). The table below is the methodological typology, i.e. advisory guidance for the human; the pipeline stages themselves are identical for every type.
 
-| Review Type | Coverage Strategy | Appraisal Required | Synthesis Method |
+| Review Type | Coverage Strategy | Appraisal (typology) | Synthesis Method |
 |---|---|---|---|
 | **Narrative** | Selective; author-chosen | None | Thematic or chronological |
 | **Scoping** | Representative → comprehensive; iterative | None | Analytic frameworks + frequency tables |
-| **Systematic** | Exhaustive; a priori protocol; no language restriction | AMSTAR/RoB/GRADE | Meta-analysis or qualitative synthesis |
+| **Systematic** | Exhaustive; a priori protocol; no language restriction | AMSTAR-2 / RoB 2 / STROBE / COREQ (per study design) | Meta-analysis or qualitative synthesis |
 | **Umbrella** | Exhaustive for SRs only | AMSTAR-2 for each SR | Tabular comparison of SR findings |
 | **Realist** | Iterative, purposive to theoretical saturation | Mixed instruments | Qualitative (aggregative or interpretive) |
 | **Critical** | Representative | None | Interpretivist or positivist |
 
-The `review_type_classifier` skill sets this at Stage 1. It cannot be changed after protocol generation (protocol is locked before search begins, following systematic review standards).
+The `review_type_classifier` skill sets this at Stage 1. It cannot be changed after protocol generation (protocol is locked before search begins, following systematic review standards). The type is stored in `state.json` and informs the protocol and queries, but `multi_source_retriever`, `quality_appraiser`, and `synthesizer` never read it: every type runs the same stages with the same default sources (PubMed, OpenAlex, Semantic Scholar; Europe PMC is opt-in). `DEPTH_BY_TYPE` in `review_type_classifier.py` is advisory text only.
 
 ---
 
@@ -107,7 +107,8 @@ reviews take about 4–6 sessions: some users work through two adjacent sessions
 │  Stage 16 Step 1: Synthesis                                         │
 │             → natural pause here to review the synthesis draft      │
 │  Stage 16 Step 2: Output Package Generation (Claude + Python)       │
-│             → 9 output artifacts written to reviews/{slug}/         │
+│             → 10 artifacts verified at Stage 16 (+ quality_report.md  │
+│               from Stage 13)                                        │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -119,7 +120,7 @@ reviews take about 4–6 sessions: some users work through two adjacent sessions
 `state.json` is the sole source of truth. Claude Code never relies on conversation history. Every session begins by running:
 
 ```bash
-python src/agent/state.py --scan reviews/
+python3 src/agent/state.py --scan reviews/
 ```
 
 If an in-progress review is found:
@@ -161,37 +162,34 @@ Each skill is a standalone Python module with defined inputs, defined outputs, a
 | 5 | `multi_source_retriever.py` | Queries, sources, year range | Raw article list; `search_log.md` with hit counts | Automated |
 | 6 | `aggregator.py` | Raw lists | Normalized list with source tags | Automated |
 | 7 | `deduplicator.py` | Normalized list | Deduplicated list; dedup report | Automated |
-| 8 | `abstract_screener.py` | Deduped list, PICO(S), criteria | Screened lists (include/exclude/borderline) + rationale | LLM-coupled (batched ×20) |
+| 8 | `abstract_screener.py` | Deduped list, PICO(S), criteria | Screened lists (include/exclude/borderline) + rationale | LLM-coupled (batched ×50, parallel slices) |
 | 8.5 | `citation_chaser.py` | Abstract-screened includes | New candidates (backward refs + forward citations); includes appended to screened set | LLM-coupled (screening only) |
 | 9 | `retrieval_list_generator.py` | Include+borderline list (database + citation-chased) | `retrieval_list.csv` (DOI, PMID, journal, OA URL) | Automated |
 | 9.5 | `pdf_downloader.py` | `retrieval_list.csv` | `pdfs/*.pdf`; `retrieval_list.csv` updated with `pdf_status`; `library_request.csv` | Automated |
 | 10 | `fulltext_assessor.py` | PDF text + PICO(S), criteria | Final included set + eligibility rationale; PDF excerpts persisted onto each Article (`fulltext_excerpt`) for downstream stages | LLM-coupled |
 | 11 | `data_extractor.py` | Included list (prefers `fulltext_excerpt` → abstract → tldr), extraction template constrained to a 29-term controlled `study_design` vocabulary | `evidence_table.csv` (design, N, outcomes, results, `data_source` provenance column) + per-field warnings (low conclusions/funding coverage, empty-input articles) | LLM-coupled (batched ×50, parallel slices) |
 | 12 | `enricher.py` | Included list | Citation counts, velocity, TLDRs, OA status, topics | Automated |
-| 13 | `quality_appraiser.py` | Included list, review type | Quality scores per article (instrument selected by study type) | LLM-coupled (batched ×20) |
-| 14 | `evidence_classifier.py` | Included list (with study designs) | NHMRC level I–IV per article | Automated (rule-based) |
+| 13 | `quality_appraiser.py` | Included list, review type | Quality scores per article (instrument selected by study type) | LLM-coupled (batched ×50, parallel slices) |
+| 14 | `evidence_classifier.py` | Included list (with study designs) | NHMRC level I–IV per article (see §11 for the code's design-to-level mapping) | Automated (rule-based) |
 | 15 | `gap_analyzer.py` | Included list, PICO(S) | Gaps, suggested queries, iteration recommendation | LLM-coupled |
 | 16a | `synthesizer.py` | Included+appraised list, review type | Narrative synthesis, evidence map, quantitative scaffold | LLM-coupled |
-| 16b | `output_formatter.py` | All prior outputs | 10 output artifacts (MD, CSV, RIS, BibTeX, PRISMA, AI disclosure) | LLM-coupled + Automated |
+| 16b | `output_formatter.py` | All prior outputs | 10 output artifacts verified (MD, CSV, RIS, BibTeX, PRISMA, AI disclosure); `quality_report.md` is written earlier, at Stage 13 | LLM-coupled + Automated |
 
 ---
 
 ## 6. Token Efficiency Design
 
 ### Abstract Screening (Highest-Volume LLM Step)
-User selects screening mode at review start:
+`screening_mode` is a stored label only: `/lit-review` sets `thorough`, `/lit-review-quick` sets `fast`. No code changes batching or the number of passes based on it. `config/settings.yaml` is reference only and is not loaded by any code; effective defaults are constants in `src/` (e.g. `multi_source_retriever.py`, `models/review.py`).
 
-- **`thorough`**: batches of 20 abstracts per Claude turn, structured JSON output
-- **`fast`**: batches of 50 per turn, borderlines only escalated to a second pass
-
-Both modes output structured JSON responses, not prose, to minimize output tokens.
+Screening output is structured JSON, not prose, to minimize output tokens.
 
 ### Batched LLM Stages
-Three stages process articles in batches of 20 to prevent context overload:
+Three stages process articles in batches of 50 (`BATCH_SIZE_DEFAULT = 50` in `abstract_screener.py`, `data_extractor.py`, `quality_appraiser.py`). The skill fans batches out to parallel sub-agent slices (`--batch-size 50`), falling back to a serial single-batch run when fewer than 50 articles are pending:
 
-- **Stage 8** (abstract screening): 20 articles per turn; Session Health check after every 9 batches (~180 articles)
-- **Stage 11** (data extraction): 20 articles per turn; Session Health check after every 5 batches (~100 articles)
-- **Stage 13** (quality appraisal): 20 articles per turn; Session Health check after every 5 batches (~100 articles)
+- **Stage 8** (abstract screening): parallel slices of 50; one orchestration turn, so no periodic Session Health check
+- **Stage 11** (data extraction): parallel slices of 50; serial fallback below 50 articles
+- **Stage 13** (quality appraisal): parallel slices of 50; serial fallback below 50 articles
 
 ### Context Minimization Per Stage
 - Synthesis and executive summary load only the included articles, NOT the full screened list (which may be 500+)
@@ -200,11 +198,13 @@ Three stages process articles in batches of 20 to prevent context overload:
 - Evidence level classification (Stage 14) is fully automated (rule-based) — no Claude turn required
 
 ### Session Health
-If context grows large mid-stage, pause at the next batch boundary, end the session, and resume with `/lit-review`. State is always saved at batch boundaries — no work is lost.
+If context grows large mid-stage, pause at the next batch boundary, end the session, and resume with `/lit-review`. State is always saved at batch boundaries — no work is lost. Parallel mode runs a stage in one orchestration turn, so there is no mid-stage context risk.
 
 ---
 
 ## 7. State Schema
+
+_Abbreviated example; see `src/models/review.py` for the full schema._
 
 ```json
 {
@@ -216,16 +216,16 @@ If context grows large mid-stage, pause at the next batch boundary, end the sess
     "P": "Hospitalized adult patients with CHF",
     "I": "Care transitions interventions",
     "C": "Usual care",
-    "O": ["30-day readmission rate", "ED visits", "mortality"]
+    "O": ["30-day readmission rate", "ED visits", "mortality"],
+    "inclusion_criteria": [],
+    "exclusion_criteria": []
   },
-  "inclusion_criteria": [],
-  "exclusion_criteria": [],
   "protocol_locked_at": "2026-04-22T14:00:00Z",
   "queries": {
     "pubmed": [
-      {"step": "#1", "query": "\"Heart Failure\"[Mesh]", "hits": 245000},
-      {"step": "#2", "query": "heart failure*[tiab] OR cardiac failure*[tiab]", "hits": 198000},
-      {"step": "#3", "query": "#1 OR #2", "hits": 302000}
+      {"step_number": "#1", "query_string": "\"Heart Failure\"[Mesh]", "database": "pubmed", "hits": 245000},
+      {"step_number": "#2", "query_string": "heart failure*[tiab] OR cardiac failure*[tiab]", "database": "pubmed", "hits": 198000},
+      {"step_number": "#3", "query_string": "#1 OR #2", "database": "pubmed", "hits": 302000}
     ],
     "openalex": [],
     "semantic_scholar": []
@@ -274,7 +274,7 @@ Note: Article lists are stored as separate JSON files (not embedded in state.jso
 | PubMed E-utilities | Primary biomedical search + MeSH lookup | NCBI API key (free) | 10 req/s | MeSH controlled vocabulary, PMID linkage |
 | OpenAlex | Cross-disciplinary search, topics, OA status | Email key (free) | Generous free tier | Topic taxonomy, institution metadata, citation counts |
 | CrossRef | DOI resolution, reference lists for citation chasing | `mailto=` polite pool | 10 req/s polite | Canonical DOI metadata, funder data |
-| Semantic Scholar | Citation velocity, influential-citation flag, TLDRs | Optional key; batch endpoints | 500 papers/batch call | TLDRs, SPECTER2 embeddings, influential-citation flag |
+| Semantic Scholar | Citation velocity, influential-citation flag, TLDRs | Optional key; batch endpoints | API allows 500 papers/batch call; client sends 100 per call | TLDRs, SPECTER2 embeddings, influential-citation flag |
 | Unpaywall | OA PDF URL per article | Email required | 100k/day (or via OpenAlex) | Best-in-class OA PDF resolution |
 | Europe PMC | Full-text XML when needed; preprint coverage | None | 10 req/s | Full-text XML, preprints, grant cross-links |
 
@@ -290,7 +290,7 @@ Note: Article lists are stored as separate JSON files (not embedded in state.jso
 
 ## 10. Output Package
 
-Eleven artifacts written to `reviews/{slug}/` on completion:
+Eleven files in `reviews/{slug}/` on completion: ten are written/verified at Stage 16 (`_EXPECTED_ARTIFACTS` in `output_formatter.py`), plus `quality_report.md` from Stage 13 and `library_request.csv` from Stage 9.5 (the table below lists all but `quality_report.md`, which is a Markdown quality-appraisal summary):
 
 | File | Format | Audience / Purpose |
 |---|---|---|
@@ -312,6 +312,8 @@ Eleven artifacts written to `reviews/{slug}/` on completion:
 
 ### NHMRC Evidence Levels (applied by `evidence_classifier`)
 
+Reference definitions (NHMRC 2009). The classifier's actual design-to-level mapping differs in places; see "How the classifier maps study designs (implementation)" in `docs/evidence_reference.md`. In brief: interrupted time series and controlled before-after map to III-1; prospective cohort and comparative study to III-2; retrospective cohort, case-control, and historical control to III-3; designs the table does not cover (cross-sectional, qualitative, mixed methods, survey) default to IV.
+
 | Level | Study Design |
 |---|---|
 | I | Systematic review of all relevant RCTs |
@@ -323,20 +325,19 @@ Eleven artifacts written to `reviews/{slug}/` on completion:
 
 ### Quality Appraisal Instruments (applied by `quality_appraiser`)
 
-Selection is automatic based on study design detected in data extraction:
+Selection is automatic based on study design detected in data extraction. GRADE is not implemented by the pipeline (reference only; see `docs/evidence_reference.md`):
 
 | Study Type | Instrument | Items |
 |---|---|---|
 | Systematic review | AMSTAR-2 | 16 items (7 critical) |
 | RCT | Cochrane RoB 2.0 | 5 domains |
-| Evidence outcomes | GRADE | 4 domains (high/moderate/low/very low) |
 | Qualitative study | COREQ | 32 items |
-| Observational (cohort/case-control) | STROBE | 22 items |
+| Observational (cohort/case-control); default for unrecognized designs | STROBE | 22 items |
 | Narrative review | SANRA | 6 items × 0–2 (score = total/12) |
 | Editorial / commentary / expert opinion | Expert Opinion rubric | 5-item transparency rubric × 0–2 (score = total/10) |
 
 ### Surrogate Outcome Warning
-Following Considine et al. (2017): the agent flags papers that use surrogate outcomes (e.g., BNP levels instead of readmission rates) and notes that the PICO-specified outcomes are the primary target.
+Following Considine et al. (2017): `evidence_classifier` flags papers that use surrogate outcomes (e.g., BNP levels instead of readmission rates) and notes that the PICO-specified outcomes are the primary target.
 
 ---
 

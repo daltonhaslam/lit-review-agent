@@ -40,7 +40,7 @@ lit-review-agent/
 │   │   ├── pico_refiner.py             # Stage 2 — interactive; Fundamental Four + PICO
 │   │   ├── protocol_generator.py       # Stage 3 — PROSPERO-style protocol
 │   │   ├── query_builder.py            # Stage 4 — MeSH + free-text; stepwise #n history
-│   │   ├── multi_source_retriever.py   # Stage 5 — PubMed, OpenAlex, S2, CrossRef, EuropePMC
+│   │   ├── multi_source_retriever.py   # Stage 5 — PubMed, OpenAlex, S2 (Europe PMC opt-in)
 │   │   ├── aggregator.py               # Stage 6 — normalize + tag sources
 │   │   ├── deduplicator.py             # Stage 7 — DOI → title sim → author/year fallback
 │   │   ├── abstract_screener.py        # Stage 8 — dual-pass LLM; --prepare / --save; batched
@@ -149,10 +149,12 @@ make deploy
 which copies each of the four skill files into its own `~/.claude/skills/{name}/SKILL.md`. Re-run it any time you pull skill changes.
 
 ### `config/settings.yaml`
+Reference only: not loaded by any code. Effective defaults are constants in `src/` (e.g. `multi_source_retriever.py`, `models/review.py`); `max_iterations` is stored per review in `state.json`, and `screening_mode` is a stored label that does not change batching (the batch size is 50 in all stage modules).
+
 ```yaml
 max_iterations: 3
-batch_size: 20                  # abstracts per LLM call (thorough mode)
-batch_size_fast: 50             # abstracts per LLM call (fast mode)
+batch_size: 20                  # historical; actual batch size is 50 (BATCH_SIZE_DEFAULT)
+batch_size_fast: 50             # historical
 default_sources:
   - pubmed
   - openalex

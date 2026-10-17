@@ -7,7 +7,7 @@ Academic-physician-grade systematic literature review tool, built as a set of [C
 ## Features
 
 - **PICO(S) formulation** via a structured "Fundamental Four" interview, locked into a PROSPERO-style protocol before search begins
-- **Multi-source retrieval** across PubMed, OpenAlex, Semantic Scholar, CrossRef, and Europe PMC, with a full MeSH + free-text query audit trail
+- **Multi-source retrieval** across PubMed, OpenAlex, and Semantic Scholar (Europe PMC optional), with CrossRef for DOI resolution and reference lists, and with a full MeSH + free-text query audit trail
 - **PRISMA 2020-compliant pipeline**: deduplication, dual-pass abstract screening, backward/forward citation chasing, full-text eligibility assessment, and a generated PRISMA flow diagram
 - **Automated open-access PDF retrieval** (Unpaywall, PubMed Central, Europe PMC, OpenAlex, CrossRef) with a guided manual step for the rest — no paywall bypass
 - **Study-type-aware quality appraisal**: AMSTAR-2, Cochrane RoB 2, STROBE, COREQ, SANRA, or an Expert Opinion rubric, chosen automatically per article
@@ -44,7 +44,7 @@ semantic_scholar_api_key: ""  # Recommended — the unauthenticated pool is ofte
 report_author: ""             # Your name as it should appear on generated reports (e.g. "Jane Smith, MD"). Blank = "Prepared using lit-review-agent".
 ```
 
-All keys except `report_author` can also be set as environment variables: `NCBI_API_KEY`, `OPENALEX_EMAIL`, `CROSSREF_MAILTO`, `UNPAYWALL_EMAIL`, `SEMANTIC_SCHOLAR_API_KEY` (the older `S2_API_KEY` name still works). None of these are required to run a review — they raise rate limits and add polite-pool access, and every source falls back to unauthenticated access.
+Every key can also be set as an environment variable: `NCBI_API_KEY`, `OPENALEX_EMAIL`, `CROSSREF_MAILTO`, `UNPAYWALL_EMAIL`, `SEMANTIC_SCHOLAR_API_KEY` (the older `S2_API_KEY` name still works). None of these are required to run a review — they raise rate limits and add polite-pool access, and every source falls back to unauthenticated access.
 
 **Semantic Scholar caveat:** the shared unauthenticated pool answers HTTP 429 for long stretches. Without a key, retrieval retries with backoff and, if the pool stays saturated, reports Semantic Scholar as a *degraded source* in the retrieval summary (`degraded_sources` / `source_status`) and in `search_log.md` rather than recording a silent zero. A free key from https://www.semanticscholar.org/product/api removes the problem.
 

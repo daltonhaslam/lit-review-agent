@@ -56,7 +56,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 ### Systematic Review
 - **Goal:** Aggregate, critically appraise, and synthesize ALL eligible evidence to answer a narrow, well-defined question
 - **Coverage:** Exhaustive — multiple databases, grey literature, no language restriction, a priori protocol (PROSPERO registration recommended)
-- **Appraisal:** Risk of bias + quality of evidence required; validated instruments (AMSTAR-2, RoB 2.0, GRADE, COREQ, STROBE)
+- **Appraisal:** Risk of bias + quality of evidence required; validated instruments (AMSTAR-2, RoB 2.0, COREQ, STROBE; GRADE is a reference methodology, not implemented by the pipeline)
 - **Synthesis:** Meta-analysis if sufficient homogeneity; qualitative synthesis (vote counting, content analysis, tabulation) otherwise
 - **Typical use:** Informing clinical guidelines; evidence-based policy; formal publications
 - **Academic physician use:** "What is the strength of evidence for nurse-driven foley removal protocols on CAUTI rates?" for quality committee presentation
@@ -65,7 +65,7 @@ From Paré & Kitsiou (2015). All types follow the same six generic steps, but di
 ### Umbrella Review (Overview of SRs)
 - **Goal:** Compare and contrast findings across multiple systematic reviews on the same broad topic
 - **Coverage:** Exhaustive search for systematic reviews only; primary studies are NOT the unit of analysis
-- **Appraisal:** AMSTAR-2 applied to each included SR; GRADE applied to evidence
+- **Appraisal:** AMSTAR-2 applied to each included SR (GRADE is reference only; not implemented by the pipeline)
 - **Synthesis:** Tabular comparison of SR findings; narrative comparison; sometimes indirect statistical comparisons
 - **Typical use:** Clinical guidelines development; policy decisions spanning multiple interventions
 - **Academic physician use:** "What do all the SRs say about sepsis bundle components?" for hospital policy
@@ -149,14 +149,14 @@ Calendar time includes the multi-day gap for hospital library PDF retrieval (bet
 
 ## How the Agent Routes by Review Type
 
-The `review_type_classifier` skill sets the review type at Stage 1. This decision then cascades through the entire workflow:
+The `review_type_classifier` skill sets the review type at Stage 1. It is stored in `state.json` and shapes the Claude-written protocol and queries, but the pipeline stages are identical for every type: `quality_appraiser`, `multi_source_retriever`, and `synthesizer` never read `review_type`. Default sources are PubMed, OpenAlex, and Semantic Scholar (Europe PMC is opt-in). The table below is advisory guidance for the human (`DEPTH_BY_TYPE` in `review_type_classifier.py` is advisory text), not enforced routing:
 
-| Review Type | Search Coverage | Appraisal Run? | Synthesis Method |
+| Review Type | Search Coverage (advisory) | Appraisal (advisory) | Synthesis Method (advisory) |
 |---|---|---|---|
 | Narrative | Representative (agent suggests 2–3 databases) | No | `synthesizer` produces thematic narrative only |
-| Scoping | Comprehensive (all 4 databases) | No | Analytic framework + frequency tables |
-| Systematic | Exhaustive (all 4 databases + grey lit check) | Yes (auto-select instrument) | `synthesizer` produces narrative + evidence map + quantitative scaffold |
-| Umbrella | Exhaustive for SRs only (AMSTAR filter applied) | Yes (AMSTAR-2) | Tabular SR comparison |
+| Scoping | Comprehensive (default sources, plus Europe PMC if wanted) | No | Analytic framework + frequency tables |
+| Systematic | Exhaustive (default sources, plus Europe PMC if wanted; grey lit check by hand) | Yes (auto-select instrument) | `synthesizer` produces narrative + evidence map + quantitative scaffold |
+| Umbrella | Exhaustive for SRs only (restrict by hand in the queries) | Yes (AMSTAR-2) | Tabular SR comparison |
 | Realist | Iterative (agent iterates until the reviewer signals saturation) | Mixed | Qualitative synthesis |
 | Critical | Representative | No | Interpretive narrative |
 
