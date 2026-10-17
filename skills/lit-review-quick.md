@@ -18,7 +18,7 @@ Rapid evidence scan for scoping reviews and landscape assessments. Skips full-te
 **Always start here:**
 
 ```bash
-python src/agent/state.py --scan reviews/
+python3 src/agent/state.py --scan reviews/
 ```
 
 Present in-progress reviews (if any); offer to resume or start new. If starting new, proceed to Quick Initialization.
@@ -58,7 +58,7 @@ Ask three questions (not four — skip Fundamental Four):
 
 1. "What is your question — what population, intervention/exposure, and outcome(s)?"
 2. "Any date range or study design preference? (default: last 10 years, all designs)"
-3. "How many articles would be useful? (default: top 100 per source)"
+3. "How many articles would be useful? (default: up to 150 per source)"
 
 Then format context for Claude (`--prepare`), build the PICO, and save it (`--save`) — the
 two-call pattern; a bare invocation exits with "one of the arguments --prepare --save is required":
@@ -99,8 +99,11 @@ Then retrieve:
 python -m src.skills.multi_source_retriever \
   --review-dir reviews/{SLUG} \
   --sources pubmed,openalex,semantic_scholar \
-  --max-per-source 150
+  --max-per-source 150 \
+  --year-from {Y}
 ```
+
+`{Y}` is the start year from the date-range answer (default: current year minus 10); omit `--year-from` only if the user wants no date limit.
 
 Show the per-source counts with their `source_status` (`ok` / `empty` / `degraded`). If `degraded_sources` is non-empty, surface each `retrieval_errors` message and ask whether to fix and re-run that source (Semantic Scholar 429 → set `semantic_scholar_api_key` in `config/api_keys.yaml`) or proceed and note the limitation in the summary. Never proceed silently past a degraded source.
 
@@ -111,7 +114,7 @@ python -m src.skills.aggregator --review-dir reviews/{SLUG}
 python -m src.skills.deduplicator --review-dir reviews/{SLUG}
 ```
 
-Display PRISMA identified count.
+Display the deduplication result from the deduplicator output: "{before} records retrieved, {removed} duplicates removed, **{after} identified (after deduplication)**." Note that `prisma_counts.identified` is the post-dedup count, so `prisma_flow.md`'s duplicates-removed and full-text-assessed lines are not meaningful on the quick path.
 
 ---
 
@@ -203,7 +206,7 @@ python3 -m src.skills.data_extractor --review-dir reviews/{SLUG} --save \
   --batch-size 50 --offset 0 --input-json '{EXTRACTIONS_JSON}'
 ```
 
-If `"complete": false`, advance `--batch-offset` by 50 and repeat. Stop when `"complete": true`.
+If `"complete": false`, advance `--batch-offset` by 50 on `--prepare` and pass the same value as `--offset` on `--save`, then repeat. Stop when `"complete": true`.
 
 Note: gap_analyzer is skipped in the quick path. Set status to `gap_analyzed` manually before running synthesizer:
 
@@ -229,13 +232,10 @@ python3 -m src.skills.synthesizer --review-dir reviews/{SLUG} --prepare
 
 Read the `synthesis_context`, `pico_text`, and `synthesis_task` fields. Apply the synthesis_task instructions to construct:
 ```json
-{
-  "executive_summary": "...",
-  "by_outcome": [{"outcome": "...", "narrative": "..."}],
-  "limitations": "...",
-  "conclusion": "..."
-}
+{"by_outcome": [{"outcome": "<PICO outcome>", "narrative": "<paragraph>", "highest_level": "<NHMRC level>", "article_count": <int>}], "overall_narrative": "<2-3 paragraph summary across all outcomes>", "key_findings": ["<bullet>"], "evidence_quality_summary": "<paragraph>", "limitations": ["<limitation>"]}
 ```
+
+The `synthesis_task` text returned by `--prepare` is the source of truth for this schema; if it differs from the above, follow `synthesis_task`.
 
 Save:
 ```bash
@@ -252,13 +252,13 @@ Probe prepare:
 python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --prepare
 ```
 
-Read the prepare output. The output_formatter is a pure-data module — it generates artifacts directly. Then save:
+Read the prepare output. Using `review_question`, `pico_text`, `search_summary`, `key_findings`, `by_outcome`, `evidence_quality`, and `limitations`, write the executive summary in markdown following the `executive_summary_task` instructions (keep inline author-year citations). Then save — `--save` writes whatever `executive_summary` you pass to `executive_summary.md`, so an empty `{}` produces a 0-byte summary:
 ```bash
 python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --save \
-  --input-json '{}'
+  --input-json '{"executive_summary": "<markdown>"}'
 ```
 
-Display the same artifact list as the full review. Note in the executive summary that this is a **scoping review / rapid landscape** — not a systematic review — so GRADE quality assessment was not performed.
+Display the artifact list from the full review (Stage 16 Step 2), reporting `artifacts_written` honestly: on the quick path 8 of the 10 expected artifacts are written (`retrieval_list.csv` is a header-only stub; `ai_disclosure.md` is written). `artifacts_missing` containing `gap_analysis.md` and `protocol.md` is expected here — do not treat it as an error. `quality_report.md` is not part of the expected list. `ai_disclosure.md`'s stage list describes the full pipeline (protocol, full-text eligibility, quality appraisal, citation chasing, gap analysis), so hand-edit it to reflect the quick path. Note in the executive summary that this is a **scoping review / rapid landscape** — not a systematic review — so GRADE quality assessment was not performed.
 
 ---
 
@@ -268,13 +268,13 @@ Display the same artifact list as the full review. Note in the executive summary
 |---|---|---|
 | PICO depth | Fundamental Four + full PICO | Abbreviated PICO |
 | Protocol | PROSPERO-style, locked | None |
-| Screening | Dual-pass Sonnet 4.6 | Haiku fast + Sonnet borderlines |
+| Screening | Dual-pass | Single-pass, liberal threshold (borderlines kept) |
 | Full-text eligibility | Yes | No |
 | Quality appraisal | AMSTAR-2 / RoB 2.0 / STROBE / COREQ / SANRA / Expert Opinion | None |
 | Evidence classification | NHMRC I–IV | None |
 | Citation chasing | Yes | No |
 | Gap analysis | Yes | No |
-| Output artifacts | 9 | 7 (no quality_report.md, retrieval_list.csv) |
+| Output artifacts | 10 | 8 (no gap_analysis.md, protocol.md; retrieval_list.csv is a header-only stub) |
 | Typical session count | 4–6 | 1–2 |
 
 ---

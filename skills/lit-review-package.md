@@ -36,7 +36,7 @@ Common validation failures and how to relay them:
 | `pandoc not found` | "Pandoc isn't installed. Run: `brew install pandoc`" |
 | `xelatex not found` | "xelatex isn't installed. Run: `brew install --cask basictex` then open a new shell" |
 | `Missing source file: <name>` | Name the file; explain that it's required and that the review pipeline may not have completed cleanly. |
-| Quick-review folder | Tell the user `/lit-review-package` v1 supports systematic + scoping reviews only. |
+| Missing `protocol.md`, `quality_report.md`, and `gap_analysis.md` together | This is a `/lit-review-quick` (or incomplete) review; those stages never ran, so packaging isn't supported. Only full-pipeline reviews can be packaged. |
 
 ---
 
@@ -52,7 +52,7 @@ Read the JSON. Tell the user:
 
 If `audit.synthesis_citations_unmatched` (read the audit JSON) is non-empty, surface it:
 
-> "Note: {N} articles cited in synthesis but no card was emitted. See `_package_audit.json`."
+> "Note: {N} author-year citations in the synthesis text match no included article. See `_package_audit.json`."
 
 ---
 
@@ -62,11 +62,11 @@ If `audit.synthesis_citations_unmatched` (read the audit JSON) is non-empty, sur
 python3 -m src.skills.packager --render reviews/{SLUG} --format both
 ```
 
-Read the JSON. If render fails, surface the stderr output to the user; explain that `package.md` is preserved and they can hand-edit and re-run `--render`.
+Read the JSON; its `artifacts` array lists the rendered file paths (output filenames come from the `review_id` in `state.json`, which may differ from the folder name — use these, not `{SLUG}`, for filenames below). If render fails, surface the stderr output to the user; explain that `package.md` is preserved and they can hand-edit and re-run `--render`.
 
 On success, tell the user:
 
-> "Rendered `{slug}_report.pdf` and `{slug}_report.docx` (Pandoc {version})."
+> "Rendered `{PDF_FILENAME}` and `{DOCX_FILENAME}` (Pandoc {version})."
 
 ---
 
@@ -76,12 +76,12 @@ On success, tell the user:
 python3 -m src.skills.packager --finalize reviews/{SLUG} \
   --pandoc-version "{VERSION}" \
   --artifact "package.md" \
-  --artifact "{SLUG}_report.pdf" \
-  --artifact "{SLUG}_report.docx" \
+  --artifact "{PDF_FILENAME}" \
+  --artifact "{DOCX_FILENAME}" \
   --artifact "_package_audit.json"
 ```
 
-Read the JSON.
+Take `{PDF_FILENAME}` / `{DOCX_FILENAME}` (basenames) from the `--render` JSON `artifacts` array. Read the JSON.
 
 ---
 
@@ -91,8 +91,8 @@ Read the JSON.
 >
 > | Artifact | File |
 > |---|---|
-> | PDF report | `reviews/{SLUG}/{SLUG}_report.pdf` |
-> | DOCX report | `reviews/{SLUG}/{SLUG}_report.docx` |
+> | PDF report | `reviews/{SLUG}/{PDF_FILENAME}` |
+> | DOCX report | `reviews/{SLUG}/{DOCX_FILENAME}` |
 > | Master Markdown | `reviews/{SLUG}/package.md` |
 > | Audit log | `reviews/{SLUG}/_package_audit.json` |
 >
