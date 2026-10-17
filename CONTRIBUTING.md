@@ -6,7 +6,7 @@ of all kinds — bug fixes, new features, documentation, tests — are welcome.
 
 ## Setup
 
-1. Clone the repository and install dependencies:
+1. Clone the repository and install dependencies (Python 3.10+ recommended; developed on 3.11):
 
    ```bash
    pip install -r requirements.txt
@@ -26,7 +26,13 @@ Run the full test suite before opening a PR:
 python3 -m pytest tests/ -q
 ```
 
-If you changed any API client code, also run the connectivity check:
+The suite runs offline: `tests/conftest.py` blocks non-loopback network access,
+so mock HTTP in new tests (see `tests/test_semantic_scholar_key_path.py` for an
+`httpx.MockTransport` example). A test that genuinely needs the network must be
+marked `@pytest.mark.network`; those are skipped unless
+`LIT_REVIEW_NETWORK_TESTS=1` is set.
+
+If you changed any API client code, also run the live connectivity check:
 
 ```bash
 python3 tests/test_api_connectivity.py
@@ -34,9 +40,9 @@ python3 tests/test_api_connectivity.py
 
 ## Deploying the Skill
 
-The skill is authored at `skills/lit-review.md` and deployed to
-`~/.claude/skills/lit-review/SKILL.md`. After editing the skill file, deploy it
-with:
+The four skills are authored as `skills/{name}.md` (`lit-review`,
+`lit-review-quick`, `lit-review-update`, `lit-review-package`) and deployed to
+`~/.claude/skills/{name}/SKILL.md`. After editing a skill file, deploy with:
 
 ```bash
 make deploy

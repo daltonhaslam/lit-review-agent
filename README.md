@@ -20,6 +20,8 @@ Academic-physician-grade systematic literature review tool, built as a set of [C
 
 ## Install
 
+Python 3.10+ recommended (developed and tested on 3.11; see [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for 3.9).
+
 ```bash
 git clone https://github.com/daltonhaslam/lit-review-agent.git
 cd lit-review-agent
@@ -133,6 +135,12 @@ One-time setup (Pandoc + xelatex):
 ```bash
 make package-deps
 ```
+
+---
+
+## Known Issues
+
+Current limitations — Semantic Scholar rate limits without a key, open-access-only retrieval, the NHMRC mapping deviation, and more — are listed in [KNOWN_ISSUES.md](KNOWN_ISSUES.md).
 
 ---
 
