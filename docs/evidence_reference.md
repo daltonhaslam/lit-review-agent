@@ -18,11 +18,28 @@ Applied by the `evidence_classifier` skill to each included article.
 | **III-3** | Comparative, historical controls | Studies with historical control group; two or more single-arm studies; interrupted time series WITHOUT a parallel control |
 | **IV** | Case series | Post-test only, or pre-test/post-test without a control group |
 
+### How the classifier maps study designs (implementation)
+
+The definitions above are the NHMRC 2009 reference. `evidence_classifier` does not apply them directly; it maps each canonical `study_design` ID (`src/skills/_study_design.py`, `CANONICAL_TO_NHMRC`) to a level:
+
+| Level | Canonical study designs mapped by the code |
+|---|---|
+| I | systematic review, meta-analysis, umbrella review |
+| II | RCT, cluster RCT |
+| III-1 | quasi-RCT, non-randomized trial, controlled before-after, interrupted time series |
+| III-2 | prospective cohort, comparative study |
+| III-3 | retrospective cohort, case-control, historical control |
+| IV | case series, case report, cross-sectional, qualitative, mixed methods, survey, economic evaluation, narrative/scoping review, editorial, commentary, letter, expert opinion, program description, QI report |
+
+**Known deviation, pending maintainer review:** compared with the reference table above, the code places retrospective cohort and case-control studies one level lower (III-3, not III-2), and places interrupted time series and controlled before-after one level higher (III-1, not III-2/III-3 depending on a parallel control). Designs the reference table does not cover (cross-sectional, qualitative, survey, economic evaluation) default to IV.
+
 **"Highest available" principle:** The focus is on determining the highest *available* level of evidence. Many clinical questions cannot achieve Level I/II. Level III or IV evidence may be the best available and still clinically actionable. Document this clearly in the executive summary.
 
 ---
 
 ## GRADE Evidence Quality
+
+_Reference only — not implemented by the pipeline. No code in `src/` assigns GRADE ratings._
 
 Applied to specific clinical outcome recommendations (different from NHMRC which applies to study design).
 
@@ -74,6 +91,8 @@ Overall bias judgment: Low / Some Concerns / High
 ---
 
 ### GRADE for Outcomes — Evidence Summaries
+_Reference only — not implemented by the pipeline._
+
 Applied to the body of evidence for each outcome across all included studies. Produces a Summary of Findings table.
 
 **Process:**
@@ -125,12 +144,19 @@ study_design → appraisal_instrument
 "meta-analysis"              → AMSTAR-2
 "randomized controlled trial"→ Cochrane RoB 2.0
 "rct"                        → Cochrane RoB 2.0
+"scoping review"             → AMSTAR-2
 "cohort study"               → STROBE
 "case-control"               → STROBE
 "cross-sectional"            → STROBE
+"quasi-RCT / non-randomized" → STROBE (checked before the RCT rule)
 "qualitative"                → COREQ
-"mixed methods"              → COREQ + STROBE (per component)
-outcome evidence             → GRADE (applied to body of evidence, not individual study)
+"narrative / policy review"  → SANRA
+"editorial / commentary /
+ letter / expert opinion"    → Expert Opinion rubric
+"mixed methods"              → STROBE (default fall-through; no mixed-methods branch)
+anything unrecognized        → STROBE
+
+(GRADE is reference only and is not part of this mapping.)
 ```
 
 ---
@@ -138,6 +164,8 @@ outcome evidence             → GRADE (applied to body of evidence, not individ
 ## PRISMA 2020 Flow Diagram
 
 Track these counters in `state.json` → `prisma_counts`. Generates `prisma_flow.md`.
+
+_Illustrative layout only._ The generated `prisma_flow.md` (`_write_prisma_flow` in `output_formatter.py`) uses a two-stream PRISMA 2020 layout (databases; citation searching) and does not report per-source counts.
 
 ```
 ┌──────────────────────────────────────────┐
@@ -186,7 +214,7 @@ Track these counters in `state.json` → `prisma_counts`. Generates `prisma_flow
 
 Populate after synthesis. Rows = outcomes; columns = study design. Shows where evidence is strong vs. thin.
 
-| Outcome | SR (Level I) | RCT (Level II) | Cohort (III-2) | Case Series (IV) | GRADE Quality |
+| Outcome | SR (Level I) | RCT (Level II) | Cohort (III-2) | Case Series (IV) | GRADE Quality (illustrative; manual, not pipeline-generated) |
 |---|---|---|---|---|---|
 | 30-day readmission | 3 SRs | 5 RCTs | 2 cohort | — | Moderate |
 | ED visits | 1 SR | 2 RCTs | — | — | Low |
@@ -208,7 +236,7 @@ From Considine et al. (2017): *"Stay true to the outcomes of interest listed in 
 | Patient experience | Press-Ganey score | Survey ≠ HCAHPS CAHPS score |
 | Cost reduction | Billing charge | Charges ≠ cost |
 
-The `data_extractor` skill flags surrogate outcomes. The `synthesizer` notes them explicitly in the executive summary.
+The `evidence_classifier` skill flags surrogate outcomes (by comparing each article's primary outcomes to the PICO outcomes). The `synthesizer` and `gap_analyzer` consume the flag and note it explicitly.
 
 ---
 

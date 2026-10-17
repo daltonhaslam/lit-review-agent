@@ -2,6 +2,8 @@
 
 Typical API call counts, LLM token usage, and session durations for a systematic review of ~500 retrieved articles → ~20 included articles. Based on pipeline architecture as of Phase 6.
 
+> **Note:** The per-stage model names (Haiku/Sonnet/Opus) and the dollar-cost figures below are historical pre-subscription estimates, retained only for relative token sizing. Today all LLM work runs in the Claude Code session (subscription; no per-call API cost) and no code selects models. Phases below are groupings, not stage numbers; see `docs/architecture.md` §3 for the session breakdown.
+
 ---
 
 ## Summary by Phase
@@ -47,7 +49,7 @@ No LLM calls. All API.
 
 ### Phase 3: Screening
 
-Assumes 500 articles, thorough mode (dual-pass Sonnet 4.6, batches of 20).
+Assumes 500 articles, thorough mode (dual-pass Sonnet 4.6, batches of 20 in the historical estimate; the pipeline now uses batches of 50 in parallel slices, so batch counts below would be roughly 10 per pass).
 
 | Pass | Model | Batches | Input tokens/batch | Total input | Total output |
 |---|---|---|---|---|---|
@@ -77,7 +79,7 @@ Assumes 20 included articles.
 | Citation chasing (Haiku screening) | Haiku 4.5 | 2–5 | ~15,000 | ~3,000 |
 
 **API calls (no LLM):**
-- Semantic Scholar batch_lookup: 1 call (up to 500 articles per call)
+- Semantic Scholar batch_lookup: 1 call per 100 articles (client batch size; the API allows 500)
 - OpenAlex get_work: 1 call per article (~20 calls)
 - CrossRef get_references: 1 call per included article (~20 calls)
 - Semantic Scholar get_citations: 1 call per included article (~20 calls)
@@ -155,11 +157,12 @@ reviews take about 4–6 sessions for a full systematic review:
 
 | Session | Stages | Natural break |
 |---|---|---|
-| 1 | Stages 1–4 (PICO + queries) | After protocol approval |
-| 2 | Stages 5–7 (retrieval + dedup) | After dedup + PRISMA count |
-| 3 | Stage 8–9 (screening + retrieval list) | Library retrieval break |
-| 4 | Stage 10–15 (full-text + extraction + quality + gap analysis) | After Checkpoint 6 |
-| 5 | Stage 16 (synthesis + output) | Final artifacts |
+| 1 | Stages 1–3 (review type, PICO, protocol) | After protocol approval |
+| 2 | Stages 4–7 (queries, retrieval, aggregation, dedup) | After dedup + PRISMA count |
+| 3 | Stages 8–9.6 (screening, citation chasing, retrieval list, PDF download) | Library retrieval break |
+| 4 | Stages 10–12 (full-text eligibility, extraction, enrichment) | After Checkpoint 5 |
+| 5 | Stages 13–15 (quality appraisal, evidence classification, gap analysis) | After Checkpoint 6 |
+| 6 | Stage 16 (synthesis + output) | Final artifacts |
 | 6+ | Iteration loop (optional) | Per iteration |
 
 Every session break is state-safe: `state.json` is atomically written after each stage.

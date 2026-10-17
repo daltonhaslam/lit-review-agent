@@ -1,3 +1,4 @@
+# Reference only — not currently loaded by the pipeline. Effective defaults are constants in src/ (e.g. src/skills/multi_source_retriever.py, src/models/review.py); max_iterations is stored per review in state.json.
 max_iterations: 3
 batch_size: 20
 batch_size_fast: 50

@@ -171,14 +171,14 @@ A key is free at https://www.semanticscholar.org/product/api (approval can take 
 
 | Endpoint | Purpose | Limit |
 |---|---|---|
-| `POST /paper/batch` | Lookup up to 500 papers by ID | 1 call = 500 papers |
+| `POST /paper/batch` | Lookup up to 500 papers by ID | API allows 500 per call; our client sends 100 per call |
 | `GET /paper/search/bulk` | Bulk search | Paginate with `token` |
 | `GET /paper/{id}/citations` | Papers citing this paper | For forward citation chasing |
 | `GET /paper/{id}/references` | References of this paper | For backward chasing |
 
 ### Batch Lookup Pattern
 ```python
-# Always use batch endpoint for enrichment — 1 call = up to 500 papers
+# Always use batch endpoint for enrichment — the API allows up to 500 papers per call (our client uses 100)
 response = post("/paper/batch", json={
     "ids": ["PMID:12345678", "DOI:10.1001/jama.2020.1234", ...],
     "fields": "title,year,citationCount,influentialCitationCount,tldr,isOpenAccess,openAccessPdf"
@@ -302,17 +302,18 @@ limiters = {
 | Stage | APIs Called | Pattern |
 |---|---|---|
 | Stage 4 (Query build) | PubMed (MeSH lookup) | Serial; 1 call per PICO aspect |
-| Stage 5 (Retrieval) | PubMed, OpenAlex, Semantic Scholar | Parallel async; batch efetch for PubMed abstracts |
+| Stage 5 (Retrieval) | PubMed, OpenAlex, Semantic Scholar (Europe PMC optional) | Parallel async; batch efetch for PubMed abstracts |
 | Stage 6 (Aggregation) | CrossRef (DOI resolution for missing DOIs) | Batch; on-demand |
-| Stage 12 (Enrichment) | Semantic Scholar (batch 500), OpenAlex (batch), Unpaywall | Parallel; batch-first |
+| Stage 12 (Enrichment) | Semantic Scholar (batch, 100 IDs per call), OpenAlex (batch), Unpaywall | Parallel; batch-first |
 | Stage 8.5 (Citation chasing) | CrossRef (references), Semantic Scholar (citations), OpenAlex (cited_by) | Per included article; serial to manage rate limits |
+| Stage 9.5 (PDF retrieval) | Unpaywall → OpenAlex → PMC → Europe PMC → CrossRef (waterfall) | Per article, stop at first hit; unresolved go to `library_request.csv` |
 
 ---
 
 ## 9. Environment Setup
 
 ```bash
-# Required (get free API keys)
+# Recommended (all optional; raise rate limits)
 export NCBI_API_KEY="your_ncbi_key"
 export OPENALEX_EMAIL="your@email.com"
 export CROSSREF_MAILTO="your@email.com"
@@ -331,4 +332,4 @@ unpaywall_email: "your@email.com"
 semantic_scholar_api_key: ""
 ```
 
-`src/integrations/__init__.py` loads from yaml with env var override.
+`src/integrations/config.py` (`load_api_config`) loads from yaml with env var override.

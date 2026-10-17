@@ -24,7 +24,7 @@ class ScreeningMode(str, Enum):
 
 
 class ReviewStatus(str, Enum):
-    # Stage names map to the 17-stage pipeline
+    # Stage names map to the 16-stage pipeline (plus sub-stages 8.5, 9.5, 9.6)
     new = "new"
     review_type_classified = "review_type_classified"
     pico_formulated = "pico_formulated"

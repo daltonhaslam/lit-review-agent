@@ -19,7 +19,7 @@ A Claude Code skill (`/lit-review`) that performs rigorous academic literature r
 4. All outputs written to `reviews/{review-slug}/` after every stage
 5. 6 human checkpoints = 6 natural session break points
 
-**Session resume:** Every session begins by running `python src/agent/state.py --scan reviews/`
+**Session resume:** Every session begins by running `python3 src/agent/state.py --scan reviews/`
 
 ---
 
@@ -57,7 +57,7 @@ Full architecture: `docs/architecture.md`
 
 - **State-driven:** Never rely on conversation history; always load `state.json`
 - **Session-safe:** Every human checkpoint = safe to end session and resume later
-- **Token efficiency:** Batch 20 articles per conversation turn for screening; load only current-stage data
+- **Token efficiency:** Batch 50 articles per conversation turn (parallel sub-agent slices) for screening; load only current-stage data
 - **Academic rigor:** Dual-pass screening, protocol locked before search, PRISMA tracking, citation chasing, quality appraisal per study type
 - **No PHI:** Reviews are research questions, not patient data
 
