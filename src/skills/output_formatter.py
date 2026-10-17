@@ -35,8 +35,11 @@ from src.agent import state as state_manager
 from src.models.article import Article
 from src.models.review import Review, ReviewStatus
 from src.skills._base import die, parse_save_input, prepare_output
+from src.skills.abstract_screener import BATCH_SIZE_DEFAULT as SCREEN_BATCH
+from src.skills.data_extractor import BATCH_SIZE_DEFAULT as EXTRACT_BATCH
 from src.skills.data_extractor import _write_evidence_table
 from src.skills.multi_source_retriever import _DB_DISPLAY_NAMES, DEFAULT_SOURCES
+from src.skills.quality_appraiser import BATCH_SIZE_DEFAULT as APPRAISE_BATCH
 
 _EXPECTED_ARTIFACTS = [
     "executive_summary.md",
@@ -292,10 +295,10 @@ def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
         "- Stage 2: PICO formulation",
         "- Stage 3: Protocol generation",
         "- Stage 4: Query construction",
-        "- Stage 8: Abstract screening (batched, 50 articles per batch)",
+        f"- Stage 8: Abstract screening (batched, {SCREEN_BATCH} articles per batch)",
         "- Stage 10: Full-text eligibility assessment",
-        "- Stage 11: Data extraction (batched, 50 articles per batch)",
-        "- Stage 13: Quality appraisal (batched, 50 articles per batch)",
+        f"- Stage 11: Data extraction (batched, {EXTRACT_BATCH} articles per batch)",
+        f"- Stage 13: Quality appraisal (batched, {APPRAISE_BATCH} articles per batch)",
         "- Stage 8.5: Citation chasing — candidate screening",
         "- Stage 15: Gap analysis",
         "- Stage 16: Evidence synthesis and executive summary",

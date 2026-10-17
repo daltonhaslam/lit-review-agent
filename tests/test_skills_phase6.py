@@ -179,8 +179,6 @@ class TestBuildSeenIds:
         assert isinstance(seen, set)
 
 
-
-
 class TestRetrieveForQueriesConfig:
     """Regression: --retrieve passed the APIConfig dataclass to code that called
     cfg.get(...), so Checkpoint 6 iteration and /lit-review-update crashed with
