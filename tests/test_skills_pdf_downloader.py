@@ -148,7 +148,9 @@ async def test_oa_url_tried_first(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=True) as mock_oa, \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         result = await download_pdfs(review_dir)
 
     mock_oa.assert_called_once()
@@ -203,7 +205,9 @@ async def test_unpaywall_tried_before_openalex(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_unpaywall", side_effect=fake_unpaywall), \
          patch("src.skills.pdf_downloader._try_openalex", side_effect=fake_openalex), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         await download_pdfs(review_dir)
 
     assert call_order[0] == "unpaywall"
@@ -220,7 +224,9 @@ async def test_pmc_tried_last(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=True) as mock_pmc:
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=True) as mock_pmc, \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         result = await download_pdfs(review_dir)
 
     mock_pmc.assert_called_once()
@@ -285,7 +291,9 @@ async def test_not_found_list_schema(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         result = await download_pdfs(review_dir)
 
     assert result["not_found"] == 1
@@ -310,7 +318,9 @@ async def test_download_report_totals(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", side_effect=oa_side_effect), \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         result = await download_pdfs(review_dir)
 
     total = result["downloaded"] + result["not_found"] + result["failed"]
@@ -332,7 +342,9 @@ async def test_library_request_csv_emitted(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=True), \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         await download_pdfs(review_dir)
 
     lib_path = review_dir / "library_request.csv"
@@ -358,7 +370,9 @@ async def test_retrieval_list_pdf_status_column(tmp_path):
     with patch("src.skills.pdf_downloader._try_oa_url", new_callable=AsyncMock, return_value=True), \
          patch("src.skills.pdf_downloader._try_unpaywall", new_callable=AsyncMock, return_value=False), \
          patch("src.skills.pdf_downloader._try_openalex", new_callable=AsyncMock, return_value=False), \
-         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False):
+         patch("src.skills.pdf_downloader._try_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_europe_pmc", new_callable=AsyncMock, return_value=False), \
+         patch("src.skills.pdf_downloader._try_crossref", new_callable=AsyncMock, return_value=False):
         await download_pdfs(review_dir)
 
     with (review_dir / "retrieval_list.csv").open() as f:

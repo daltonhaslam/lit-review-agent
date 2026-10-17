@@ -98,6 +98,7 @@ def _write_candidates(
 # Issue 31: borderlines preserved in save()
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("no_citation_metadata_network")
 class TestCitationChaserSaveBorderlines:
     def test_include_and_borderline_both_appended(self, tmp_path, capsys):
         _, review_dir = _make_review(tmp_path, status=ReviewStatus.abstract_screening)

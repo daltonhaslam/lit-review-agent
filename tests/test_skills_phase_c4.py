@@ -263,6 +263,7 @@ class TestQualityAppraiserSave:
 # citation_chaser — save (prepare is async/API-dependent; tested via mock separately)
 # ===========================================================================
 
+@pytest.mark.usefixtures("no_citation_metadata_network")
 class TestCitationChaserSave:
     def _write_candidates(self, review_dir: Path, candidates: list[Article],
                           backward_count: int = 0, forward_count: int = 0) -> None:

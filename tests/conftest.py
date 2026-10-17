@@ -33,13 +33,13 @@ def pytest_collection_modifyitems(config, items):
         return
     skip = pytest.mark.skip(reason="network test — set LIT_REVIEW_NETWORK_TESTS=1 to run")
     for item in items:
-        if "network" in item.keywords:
+        if item.get_closest_marker("network"):
             item.add_marker(skip)
 
 
 @pytest.fixture(autouse=True)
 def _block_network(request, monkeypatch):
-    if "network" in request.keywords:
+    if request.node.get_closest_marker("network"):
         return
 
     real_getaddrinfo = socket.getaddrinfo
@@ -60,3 +60,18 @@ def _block_network(request, monkeypatch):
     monkeypatch.setattr(socket.socket, "connect_ex", guard(socket.socket.connect_ex))
     monkeypatch.setattr(socket, "getaddrinfo", guarded_getaddrinfo)
 
+
+
+@pytest.fixture
+def no_citation_metadata_network(monkeypatch):
+    """Stub citation_chaser's best-effort CrossRef/OpenAlex/S2 metadata enrichment so
+    tests of --save / --enrich-cc exercise the bookkeeping, not the (blocked) network."""
+    from unittest.mock import AsyncMock
+
+    from src.skills import citation_chaser
+
+    monkeypatch.setattr(
+        citation_chaser,
+        "_enrich_missing_metadata",
+        AsyncMock(side_effect=lambda *a, **kw: citation_chaser._zero_metadata_stats()),
+    )

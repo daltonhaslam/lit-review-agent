@@ -8,6 +8,7 @@ All offline: the transport never opens a socket, and rate-limit/backoff waits ar
 """
 from __future__ import annotations
 
+import asyncio
 import shutil
 import sys
 from pathlib import Path
@@ -47,8 +48,8 @@ def _mock_http(handler):
 def _no_waits(monkeypatch):
     """Skip the S2 rate limiter and retry backoff so tests run instantly."""
     monkeypatch.setattr(s2_module.LIMITER, "acquire", AsyncMock())
-    monkeypatch.setattr("src.utils.rate_limiter.asyncio.sleep", AsyncMock())
-    monkeypatch.setattr("src.integrations.semantic_scholar_client.asyncio.sleep", AsyncMock())
+    # Both the retry backoff and the S2 page loop call asyncio.sleep; one patch covers both.
+    monkeypatch.setattr(asyncio, "sleep", AsyncMock())
 
 
 class _Recorder:
