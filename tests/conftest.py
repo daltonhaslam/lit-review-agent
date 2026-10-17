@@ -17,6 +17,7 @@ import socket
 
 import pytest
 
+# Hosts getaddrinfo may resolve (None = passive/wildcard lookup).
 _LOOPBACK = {None, "localhost", "127.0.0.1", "::1", b"localhost", b"127.0.0.1", b"::1"}
 
 
@@ -41,25 +42,21 @@ def _block_network(request, monkeypatch):
     if "network" in request.keywords:
         return
 
-    real_connect = socket.socket.connect
-    real_connect_ex = socket.socket.connect_ex
     real_getaddrinfo = socket.getaddrinfo
 
-    def guarded_connect(self, address):
-        if not _is_loopback(address):
-            raise OSError(f"network access blocked in tests: connect to {address!r}")
-        return real_connect(self, address)
-
-    def guarded_connect_ex(self, address):
-        if not _is_loopback(address):
-            raise OSError(f"network access blocked in tests: connect to {address!r}")
-        return real_connect_ex(self, address)
+    def guard(real):
+        def guarded(self, address):
+            if not _is_loopback(address):
+                raise OSError(f"network access blocked in tests: connect to {address!r}")
+            return real(self, address)
+        return guarded
 
     def guarded_getaddrinfo(host, *args, **kwargs):
         if host not in _LOOPBACK:
             raise socket.gaierror(f"network access blocked in tests: DNS lookup for {host!r}")
         return real_getaddrinfo(host, *args, **kwargs)
 
-    monkeypatch.setattr(socket.socket, "connect", guarded_connect)
-    monkeypatch.setattr(socket.socket, "connect_ex", guarded_connect_ex)
+    monkeypatch.setattr(socket.socket, "connect", guard(socket.socket.connect))
+    monkeypatch.setattr(socket.socket, "connect_ex", guard(socket.socket.connect_ex))
     monkeypatch.setattr(socket, "getaddrinfo", guarded_getaddrinfo)
+
