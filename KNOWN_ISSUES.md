@@ -36,6 +36,9 @@ _Last reviewed: 2026-10-17_
 - **Updates and iterations search PubMed only.** `/lit-review-update` and the
   Checkpoint 6 iteration loop re-query PubMed. They do not re-query OpenAlex or
   Semantic Scholar.
+- **Iterations don't update "identified".** Records found by a Checkpoint 6 iteration or
+  an update are added to `prisma_counts.screened` but not to `prisma_counts.identified`, so
+  `prisma_flow.md`'s duplicates-removed figure is understated after an iteration.
 - **Year range doesn't reach the screener.** `--year-from/--year-to` filter the
   API calls but never set `date_range` in `state.json`, so Stage 8's date
   pre-filter never runs.

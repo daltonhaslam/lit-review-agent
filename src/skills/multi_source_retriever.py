@@ -26,8 +26,7 @@ from src.integrations.europepmc_client import EuropePMCClient
 from src.integrations.openalex_client import OpenAlexClient
 from src.integrations.pubmed_client import PubMedClient
 from src.integrations.semantic_scholar_client import SemanticScholarClient
-from src.integrations.sources import DEFAULT_SOURCES
-from src.integrations.sources import SOURCE_DISPLAY_NAMES as _DB_DISPLAY_NAMES
+from src.integrations.sources import DEFAULT_SOURCES, SOURCE_DISPLAY_NAMES, display_names
 from src.models.article import Article
 from src.models.review import ReviewStatus
 
@@ -169,7 +168,7 @@ def _write_search_log(
     # Use the sources actually searched this run; review.sources_searched is only assigned
     # after this function is called, so relying on it would emit a blank/stale header.
     searched = sources if sources is not None else review.sources_searched
-    db_names = [_DB_DISPLAY_NAMES.get(s, s) for s in searched]
+    db_names = display_names(searched)
 
     lines = [
         "# Search Log",
@@ -191,7 +190,7 @@ def _write_search_log(
         if db not in by_source:
             continue
         queries = getattr(review.queries, db)
-        db_name = _DB_DISPLAY_NAMES.get(db, db)
+        db_name = SOURCE_DISPLAY_NAMES.get(db, db)
         lines.append(f"## {db_name}")
         if queries:
             lines.append(f"- Query: `{queries[0].query_string}`")

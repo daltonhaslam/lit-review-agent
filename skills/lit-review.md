@@ -1215,7 +1215,7 @@ Then re-run **Stages 11–14** (data_extractor → enricher → quality_appraise
 extraction is additive, so the primary set's fields are preserved) and **Stage 15** (gap_analyzer),
 then return to **Checkpoint 6**.
 
-If `advancing_to_fulltext == 0`, `--merge` leaves status at `gap_analyzed` (the screened candidates are still recorded in `articles_screened.json` and `prisma_counts.screened`). Return directly to **Checkpoint 6** — iterate again or proceed to synthesis.
+If `advancing_to_fulltext == 0`, `--merge` leaves status at `gap_analyzed` (the screened candidates are still recorded in `articles_screened.json` and `prisma_counts.screened`). Return directly to **Checkpoint 6** — iterate again or proceed to synthesis. Iterating again re-runs the same `suggested_queries` from `gap_analysis.json` (and uses another of `max_iterations`), so only do so after revising the queries — re-run Stage 15 or edit `gap_analysis.json` with the user.
 
 If user chooses to proceed:
 > "✓ Proceeding to Phase 5: Synthesis + Output.
