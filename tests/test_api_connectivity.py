@@ -1,7 +1,15 @@
-"""Quick connectivity check for all 6 APIs. Run from project root."""
+"""Quick connectivity check for all 6 APIs. Run from project root:
+
+    python3 tests/test_api_connectivity.py
+
+Makes live calls, so under pytest these are marked ``network`` and skipped unless
+LIT_REVIEW_NETWORK_TESTS=1 is set (see tests/conftest.py).
+"""
 import asyncio
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
@@ -12,6 +20,8 @@ cfg = load_api_config()
 TIMEOUT = 15.0
 TEST_DOI = "10.1016/j.ijmedinf.2015.02.002"  # Paré & Kitsiou 2015
 TEST_PMID = "25835562"
+
+pytestmark = pytest.mark.network
 
 
 async def check(name: str, coro):
