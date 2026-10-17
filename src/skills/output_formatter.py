@@ -36,6 +36,7 @@ from src.models.article import Article
 from src.models.review import Review, ReviewStatus
 from src.skills._base import die, parse_save_input, prepare_output
 from src.skills.data_extractor import _write_evidence_table
+from src.skills.multi_source_retriever import _DB_DISPLAY_NAMES, DEFAULT_SOURCES
 
 _EXPECTED_ARTIFACTS = [
     "executive_summary.md",
@@ -274,6 +275,9 @@ def _stub_retrieval_list(review_dir: Path) -> None:
 def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
     now = _today()
     review_type = review.review_type.value if review.review_type else "systematic"
+    sources = ", ".join(
+        _DB_DISPLAY_NAMES.get(s, s) for s in (review.sources_searched or DEFAULT_SOURCES)
+    )
 
     lines = [
         "# AI-Assisted Review Disclosure (PRISMA-trAIce)",
@@ -288,20 +292,21 @@ def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
         "- Stage 2: PICO formulation",
         "- Stage 3: Protocol generation",
         "- Stage 4: Query construction",
-        "- Stage 8: Abstract screening (batched, ~20 articles per turn)",
+        "- Stage 8: Abstract screening (batched, 50 articles per batch)",
         "- Stage 10: Full-text eligibility assessment",
-        "- Stage 11: Data extraction (batched, ~20 articles per turn)",
-        "- Stage 13: Quality appraisal (batched, ~20 articles per turn)",
+        "- Stage 11: Data extraction (batched, 50 articles per batch)",
+        "- Stage 13: Quality appraisal (batched, 50 articles per batch)",
         "- Stage 8.5: Citation chasing — candidate screening",
         "- Stage 15: Gap analysis",
         "- Stage 16: Evidence synthesis and executive summary",
         "",
         "## Automated Stages (no LLM)",
         "",
-        "- Stage 5: Database retrieval (API calls — PubMed, OpenAlex, Semantic Scholar, Europe PMC)",
+        f"- Stage 5: Database retrieval (API calls — {sources})",
         "- Stage 6: DOI resolution via CrossRef",
         "- Stage 7: Deduplication (DOI → title similarity → author+year fingerprint)",
-        "- Stage 9.5: PDF download (automated waterfall: Unpaywall → OpenAlex → EuropePMC)",
+        "- Stage 9.5: PDF download (open-access waterfall: existing OA link → Unpaywall → "
+        "OpenAlex → PubMed Central → Europe PMC → Crossref)",
         "- Stage 12: Enrichment (Semantic Scholar / OpenAlex — citation counts, TLDRs, OA status)",
         "- Stage 14: Evidence level classification (rule-based NHMRC I–IV)",
         "",
