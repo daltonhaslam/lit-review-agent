@@ -17,7 +17,7 @@ Update an existing **completed** systematic review with new literature published
 python3 -m src.skills.packager --scan reviews/
 ```
 
-(`state.py --scan` skips completed reviews, so use the packager scan; it returns `{"reviews": [{review_id, review_type, raw_question, ...}]}` for every `status=complete` review.) The user may also pass a slug directly (`/lit-review-update <slug>`) — skip the scan then. Present the completed reviews. Ask:
+(`state.py --scan` skips completed reviews, so use the packager scan; it returns `{"reviews": [{slug, review_id, review_type, raw_question, ...}]}` for every `status=complete` review. Use `slug` — the folder name under `reviews/` — as `{SLUG}`; `review_id` can differ from it.) The user may also pass a slug directly (`/lit-review-update <slug>`) — skip the scan then. Present the completed reviews. Ask:
 > "Which completed review would you like to update? I'll re-run the original PubMed query with a date filter and screen only new articles."
 
 If no completed reviews are found, offer to start a new review with `/lit-review` instead.
@@ -75,10 +75,13 @@ from src.models.review import ReviewStatus
 review_dir = Path("reviews/{SLUG}")
 r = sm.load(review_dir)
 
-# Back up the completed review's gap analysis before overwriting it
+# Back up the completed review's gap analysis before overwriting it. If a backup already
+# exists, an earlier update was interrupted and gap_analysis.json may already be the stub —
+# keep the existing backup, it is the only copy of the real gap analysis.
 gap_path = review_dir / "gap_analysis.json"
-if gap_path.exists():
-    shutil.copy2(gap_path, review_dir / "gap_analysis.pre_update.json")
+backup = review_dir / "gap_analysis.pre_update.json"
+if gap_path.exists() and not backup.exists():
+    shutil.copy2(gap_path, backup)
 
 # Build date-filtered query
 original_query = r.queries.pubmed[-1].query_string if r.queries.pubmed else ""
@@ -129,13 +132,15 @@ If `no_new_articles: true`:
 > "No new articles were found since the original search. The review is up to date."
 > Done — no further action needed.
 
-**Restore before stopping** (the review must not be left looking in-progress, and the stub must not replace the real gap analysis):
+**Restore before stopping** (the review must not be left looking in-progress, the stub must not replace the real gap analysis, and the PRISMA diagram must match the recorded screening):
 ```bash
 python3 - <<'EOF'
-import sys, shutil; sys.path.insert(0, ".")
+import sys, json, shutil; sys.path.insert(0, ".")
 from pathlib import Path
 from src.agent import state as sm
+from src.models.article import Article
 from src.models.review import ReviewStatus
+from src.skills.output_formatter import _write_prisma_flow
 
 review_dir = Path("reviews/{SLUG}")
 backup = review_dir / "gap_analysis.pre_update.json"
@@ -144,7 +149,11 @@ if backup.exists():
 r = sm.load(review_dir)
 r.status = ReviewStatus.complete
 sm.save(r, review_dir)
-print("Restored gap_analysis.json; status=complete.")
+# --merge may have added newly screened (all excluded) records to prisma_counts.screened;
+# regenerate the PRISMA diagram so it matches state.json.
+included = [Article(**a) for a in json.loads((review_dir / r.articles_included_file).read_text())]
+_write_prisma_flow(r, review_dir / "prisma_flow.md", included)
+print("Restored gap_analysis.json; status=complete; prisma_flow.md regenerated.")
 EOF
 ```
 

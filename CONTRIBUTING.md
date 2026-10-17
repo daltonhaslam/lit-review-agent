@@ -6,7 +6,7 @@ of all kinds — bug fixes, new features, documentation, tests — are welcome.
 
 ## Setup
 
-1. Clone the repository and install dependencies (Python 3.10+ recommended; developed on 3.11):
+1. Clone the repository and install dependencies (Python 3.9+; developed on 3.11):
 
    ```bash
    pip install -r requirements.txt

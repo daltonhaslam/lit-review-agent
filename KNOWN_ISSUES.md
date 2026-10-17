@@ -71,10 +71,8 @@ _Last reviewed: 2026-10-17_
 - **Network tests.** `tests/test_api_connectivity.py` makes live calls and is
   skipped unless `LIT_REVIEW_NETWORK_TESTS=1`. Every other test runs offline:
   `tests/conftest.py` blocks non-loopback network access.
-- **Python version.** Developed and tested on Python 3.11. On macOS's system
-  Python 3.9, three PDF-downloader tests fail because a module-level
-  `asyncio.Lock` is bound to an earlier event loop. Normal single-run CLI use is
-  unaffected, but 3.10+ is recommended.
+- **Python version.** The test suite passes on Python 3.11 (primary) and on macOS's
+  system Python 3.9. Other versions are untested.
 - **Dependency advisories.** `requirements.txt` caps `pypdf<6` and `lxml<6`. The
   newest allowed versions (pypdf 5.9, lxml 5.4) carry published advisories that
   are fixed only in the next major versions. pypdf parses downloaded PDFs. lxml

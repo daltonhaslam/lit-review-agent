@@ -20,7 +20,7 @@ Academic-physician-grade systematic literature review tool, built as a set of [C
 
 ## Install
 
-Python 3.10+ recommended (developed and tested on 3.11; see [KNOWN_ISSUES.md](KNOWN_ISSUES.md) for 3.9).
+Requires Python 3.9+ (developed on 3.11; the test suite also passes on macOS system Python 3.9).
 
 ```bash
 git clone https://github.com/daltonhaslam/lit-review-agent.git

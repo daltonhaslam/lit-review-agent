@@ -15,7 +15,7 @@ Turns any completed `/lit-review` (or `/lit-review-update`) output into a single
    ```bash
    python3 -m src.skills.packager --scan reviews/
    ```
-   Read the JSON. If exactly one `complete` review exists, ask: "Package `{slug}`?" If multiple, list them and ask which to package. If none, tell the user there are no completed reviews to package.
+   Read the JSON. Each row's `slug` is the folder name under `reviews/` — use it as `{SLUG}` (`review_id` can differ). If exactly one `complete` review exists, ask: "Package `{slug}`?" If multiple, list them and ask which to package. If none, tell the user there are no completed reviews to package.
 
 2. Confirm with the user before continuing.
 

@@ -32,13 +32,13 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.agent import state as state_manager
+from src.integrations.sources import DEFAULT_SOURCES, SOURCE_DISPLAY_NAMES
 from src.models.article import Article
 from src.models.review import Review, ReviewStatus
 from src.skills._base import die, parse_save_input, prepare_output
 from src.skills.abstract_screener import BATCH_SIZE_DEFAULT as SCREEN_BATCH
 from src.skills.data_extractor import BATCH_SIZE_DEFAULT as EXTRACT_BATCH
 from src.skills.data_extractor import _write_evidence_table
-from src.skills.multi_source_retriever import _DB_DISPLAY_NAMES, DEFAULT_SOURCES
 from src.skills.quality_appraiser import BATCH_SIZE_DEFAULT as APPRAISE_BATCH
 
 _EXPECTED_ARTIFACTS = [
@@ -67,6 +67,11 @@ _EXECUTIVE_SUMMARY_TASK = (
 
 def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+
+def _source_names(review: Review) -> list[str]:
+    """Display names of the sources searched (defaults when state predates sources_searched)."""
+    return [SOURCE_DISPLAY_NAMES.get(s, s) for s in (review.sources_searched or DEFAULT_SOURCES)]
 
 
 def _write_prisma_flow(review: Review, output_path: Path, articles: list[Article]) -> None:
@@ -98,7 +103,7 @@ def _write_prisma_flow(review: Review, output_path: Path, articles: list[Article
         "",
         "### Stream 1: Databases and Registers",
         f"- Records identified via database searching: **{p.identified}**",
-        f"  - Sources: {', '.join(review.sources_searched) or 'PubMed, OpenAlex, Semantic Scholar'}",
+        f"  - Sources: {', '.join(_source_names(review))}",
         f"- Duplicate records removed: {max(0, p.identified - p.screened)}",
         "",
         "### Stream 2: Citation Searching",
@@ -278,9 +283,7 @@ def _stub_retrieval_list(review_dir: Path) -> None:
 def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
     now = _today()
     review_type = review.review_type.value if review.review_type else "systematic"
-    sources = ", ".join(
-        _DB_DISPLAY_NAMES.get(s, s) for s in (review.sources_searched or DEFAULT_SOURCES)
-    )
+    sources = ", ".join(_source_names(review))
 
     lines = [
         "# AI-Assisted Review Disclosure (PRISMA-trAIce)",
@@ -501,7 +504,7 @@ def prepare(review_dir: Path) -> None:
         "review_type": review_type,
         "pico_text": pico_text,
         "search_summary": {
-            "databases": list(review.sources_searched) or ["PubMed", "OpenAlex", "Semantic Scholar"],
+            "databases": _source_names(review),
             "identified": prisma.identified,
             "screened": prisma.screened,
             "eligibility": prisma.eligibility,

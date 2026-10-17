@@ -575,6 +575,7 @@ def cmd_scan(reviews_dir: Path) -> int:
             if review.status.value != "complete":
                 continue
             rows.append({
+                "slug": entry.name,
                 "review_id": review.review_id,
                 "review_type": review.review_type.value if review.review_type else None,
                 "raw_question": review.raw_question,
