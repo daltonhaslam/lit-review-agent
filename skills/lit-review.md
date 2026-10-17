@@ -113,6 +113,8 @@ If the user wants a different type, re-run `--save` with the corrected type:
 python3 -m src.skills.review_type_classifier --review-dir reviews/{SLUG} --save --input-json '{"review_type": "{CORRECTED_TYPE}", "rationale": "{RATIONALE}"}'
 ```
 
+`review_type` must be one of `narrative`, `scoping`, `systematic`, `umbrella`, `realist`, `critical`. An invalid value is silently coerced to `narrative`, so check `review_type` in the `--save` output matches what you intended.
+
 Once confirmed, proceed to Stage 2.
 
 ---
@@ -190,38 +192,35 @@ If the user continues, proceed to Stage 3.
 ## Stage 3: Protocol Generation
 
 Warn the user before running:
-> "I'll now generate a PROSPERO-style protocol based on your PICO. **This action locks the protocol** — it cannot be regenerated after approval, which preserves pre-registration integrity. Proceed?"
+> "I'll now generate a PROSPERO-style protocol based on your PICO. **The protocol locks the moment it is saved** — it cannot be regenerated afterward, which preserves pre-registration integrity. I'll show you the draft first and only save it once you approve. Proceed?"
 
 After confirmation, format context for Claude:
 ```bash
 python3 -m src.skills.protocol_generator --review-dir reviews/{SLUG} --prepare
 ```
 
-Read the JSON output. Using the PICO, review metadata, and `protocol_structure` provided, write the full PROSPERO-style protocol — every section concrete, no placeholder text. Then save:
-```bash
-python3 -m src.skills.protocol_generator --review-dir reviews/{SLUG} --save --input-json '{"protocol_text": "{FULL_MARKDOWN_PROTOCOL}"}'
-```
-
-Display the saved protocol to the user:
-```bash
-cat reviews/{SLUG}/protocol.md
-```
-
-Proceed to Checkpoint 2.
+Read the JSON output. Using the PICO, review metadata, and `protocol_structure` provided, write the full PROSPERO-style protocol — every section concrete, no placeholder text. **Do not run `--save` yet** — `--save` writes `protocol.md` and sets `protocol_locked_at`; both `--prepare` and `--save` then exit with `protocol_locked`. Show the draft to the user in the conversation and proceed to Checkpoint 2.
 
 ---
 
 ## Checkpoint 2: Protocol Approval
 
-> "Here is your research protocol. Review it carefully — once you approve, the protocol is locked and cannot be modified.
+> "Here is your research protocol draft. Review it carefully — once you approve and I save it, the protocol is locked and cannot be modified.
 >
-> [Protocol content above]
+> [Draft protocol text]
 >
 > Do you approve this protocol?"
 
-If the user requests changes: explain that the protocol cannot be regenerated once locked. If they haven't approved yet, re-run pico_refiner with updates, then re-run protocol_generator.
+If the user requests changes: the protocol is still a draft (nothing saved), so revise the text, re-show it, and ask again. If they want PICO changes, re-run pico_refiner first, then re-run `protocol_generator --prepare`. Never run `--save` before approval.
 
-After approval:
+After approval, save (this locks the protocol):
+```bash
+python3 -m src.skills.protocol_generator --review-dir reviews/{SLUG} --save --input-json '{"protocol_text": "{FULL_MARKDOWN_PROTOCOL}"}'
+```
+
+If `--save` was run before approval and the user wants changes, the only recovery is manually clearing `protocol_locked_at` in `state.json` (and resetting status) — tell the user before doing so.
+
+Then:
 > "Protocol locked at {protocol_locked_at}. ✓ Protocol file saved to `reviews/{SLUG}/protocol.md`.
 >
 > **Safe session break point.** You may end this session now. When you resume with `/lit-review`, I will continue with Stage 4 (Query Construction)."
@@ -245,7 +244,7 @@ Read the JSON output. The `pubmed_steps_from_mesh` field contains the stepwise P
 - **`europepmc_query`**: plain Boolean keyword string (AND/OR/NOT allowed; no MeSH tags)
 - **`semantic_scholar_query`**: natural-language phrase ONLY — no AND/OR/NOT, no parentheses, no field tags; write it as a short phrase a human would type into a search bar (e.g., `"pediatric observation hospitalization children hospital trend"`)
 
-Refine `pubmed_steps` only if needed. Then save:
+Refine `pubmed_steps` only if needed. `pubmed_steps` is required and must be non-empty — a list of `{"step": "#N", "query": "...", "rationale": "..."}` objects (`step` and `query` are mandatory; an empty list saves no PubMed query and Stage 5 will then refuse to run). Then save:
 ```bash
 python3 -m src.skills.query_builder --review-dir reviews/{SLUG} --save --input-json '{"pubmed_steps": [...], "openalex_query": "...", "semantic_scholar_query": "...", "europepmc_query": "..."}'
 ```
@@ -293,9 +292,11 @@ python3 -m src.skills.multi_source_retriever \
   --max-per-source 500
 ```
 
-Add `--year-from YYYY --year-to YYYY` if a year range was specified in the protocol.
+Add `europepmc` to `--sources` if the user wants Europe PMC (exact tokens: `pubmed,openalex,semantic_scholar,europepmc`; any other token is silently ignored, so check the per-source table for every source you asked for).
 
-Display results — always the per-source table, with the `source_status` value beside each count (`ok` / `empty` / `degraded`):
+Add `--year-from YYYY --year-to YYYY` if a year range was specified in the protocol. These flags filter the API calls only; they do **not** set `review.date_range` in `state.json`, so Stage 8's date-range pre-filter will not apply unless `date_range` is set.
+
+Display results — always the per-source table (include the Europe PMC row only if it was searched), with the `source_status` value beside each count (`ok` / `empty` / `degraded`):
 > **Retrieval complete.**
 >
 > | Source | Records retrieved | Status |
@@ -303,6 +304,7 @@ Display results — always the per-source table, with the `source_status` value 
 > | PubMed | {by_source.pubmed} | {source_status.pubmed} |
 > | OpenAlex | {by_source.openalex} | {source_status.openalex} |
 > | Semantic Scholar | {by_source.semantic_scholar} | {source_status.semantic_scholar} |
+> | Europe PMC | {by_source.europepmc} | {source_status.europepmc} |
 > | **Total (pre-dedup)** | {total} | |
 
 If `degraded_sources` is non-empty, the run is **not** a clean search — say so explicitly and show each message from `retrieval_errors`:
@@ -324,8 +326,8 @@ Run the aggregator to resolve any missing DOIs via CrossRef:
 python3 -m src.skills.aggregator --review-dir reviews/{SLUG}
 ```
 
-This is a silent background step. Show a brief status line only if DOIs were resolved:
-> "DOI resolution: {dois_resolved} missing DOIs resolved via CrossRef."
+This is a silent background step. Show a brief status line from the aggregator output:
+> "DOI resolution: {with_doi}/{total} articles have a DOI."
 
 Then automatically proceed to Stage 7.
 
@@ -375,7 +377,7 @@ python3 -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
 ```
 
 Read the JSON output. Note `total_articles`, `pending_articles`, `auto_resume_offset`, and `effective_offset`.
-- If `pre_filtered_total > 0`, inform the user: "Pre-filtered {pre_filtered_total} articles outside the protocol date range — skipping to in-range articles."
+- If `pre_filtered_total > 0` (only possible when `state.date_range` is set), inform the user: "Pre-filtered {pre_filtered_total} articles outside the protocol date range — skipping to in-range articles."
 - If `auto_resume_offset > 0`, inform the user: "Resuming from article {auto_resume_offset} — {auto_resume_offset} decisions already saved."
 
 ### Step 2 — Choose mode
@@ -474,7 +476,7 @@ Pause here. Wait for user confirmation before proceeding to Stage 8.5.
 ## Stage 8.5: Citation Chasing
 
 Inform the user:
-> "I'll run CrossRef + Semantic Scholar citation chasing on the abstract-screening includes, then screen any new candidates with parallel sub-agents."
+> "I'll run CrossRef + Semantic Scholar citation chasing on the abstract-screening includes and borderlines, then screen any new candidates with parallel sub-agents."
 
 ### Step 1 — Build the candidate set
 
@@ -484,7 +486,7 @@ Run the network pipeline once (CrossRef references + S2 citations + identifier e
 python3 -m src.skills.citation_chaser --review-dir reviews/{SLUG} --prepare
 ```
 
-Read the JSON output. Note `total_candidates`. If `total_candidates == 0`, skip screening and finalize:
+Read the JSON output. Note `total_candidates`. If `total_candidates == 0` AND `backward_count == 0` AND `forward_count == 0`, this can mean either no new references exist **or** the sources were unreachable (every network call in the chase swallows its exceptions, so an outage looks identical to an empty result). Tell the user this and ask them to confirm connectivity (CrossRef, Semantic Scholar) — and re-run `--prepare` if in doubt — before finalizing. If `total_candidates == 0` and the user confirms, skip screening and finalize:
 ```bash
 python3 -m src.skills.citation_chaser --review-dir reviews/{SLUG} --save --input-json '{"decisions": []}'
 ```
@@ -531,7 +533,7 @@ python3 -m src.skills.citation_chaser --review-dir reviews/{SLUG} --save --input
 
 ### Serial mode (fallback for `total_candidates < 50`)
 
-Screen the candidates in `candidates` against `pico_context` using the `screening_task` instructions. Only articles with `screening_decision == "include"` were used as seeds — borderlines do not generate citation-chased candidates. Construct:
+Screen the candidates in `candidates` against `pico_context` using the `screening_task` instructions. Seeds were the abstract-screening includes **and** borderlines. Construct:
 ```json
 {"decisions": [{"index": N, "decision": "include|exclude|borderline", "rationale": "1 sentence"}]}
 ```
@@ -550,15 +552,16 @@ Display:
 > | Forward candidates (citing papers) | {forward_candidates} |
 > | After deduplication | {after_dedup} |
 > | **New includes added** | {new_includes} |
+> | New borderlines added | {new_borderlines} |
 >
 > PRISMA citation_chasing_added: {new_includes}
 >
 > Search log updated: `reviews/{SLUG}/search_log.md`
 
-If new_includes > 0:
-> "✓ {new_includes} new articles added via citation chasing and appended to the screened set. Stage 9 will generate a single combined retrieval list covering both database-searched and citation-chased articles."
+If new_includes > 0 or new_borderlines > 0 (both are appended to the screened set):
+> "✓ {new_includes} new includes and {new_borderlines} new borderlines added via citation chasing and appended to the screened set. Stage 9 will generate a single combined retrieval list covering both database-searched and citation-chased articles."
 
-If new_includes == 0:
+If new_includes == 0 and new_borderlines == 0:
 > "No new articles added via citation chasing."
 
 Then automatically proceed to Stage 9.
@@ -707,7 +710,7 @@ Recommendation logic:
 
 > "PDFs ready for full-text assessment: {pdfs_ready} / {total} articles. Would you like to proceed to Stage 10 (Full-Text Assessment), wait for more PDFs, or take a break?"
 
-If taking a break: state is saved at `pdfs_downloaded`. Resume by starting a new session — the agent will pick up at Stage 10.
+If taking a break: state is saved at `pdfs_downloaded`. Resume by starting a new session — the agent will route per the Stage Routing table (Stage 9.6 / Checkpoint 4), then continue to Stage 10.
 
 ---
 
@@ -773,7 +776,7 @@ python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --prepare --
 In a single message, make N `Agent` tool calls (use `subagent_type: "general-purpose"`). Each prompt must be self-contained and contain:
 - The `assessment_task` text from the slice prepare output.
 - The `pico_context`, `inclusion_criteria`, `exclusion_criteria` shared fields.
-- That slice's `articles` array verbatim (each entry has `orig_idx`, `pdf_found`, `fulltext`, and possibly `pdf_low_confidence` + `pdf_match_warnings`).
+- That slice's `articles` array verbatim (each entry has `orig_idx`, `title`, `pdf_found`, `pdf_low_confidence` (always present, true/false), and `fulltext`; `pdf_match_warnings` is a separate top-level list in the prepare output, not a per-entry field — pass it along if non-empty).
 - Instruction: respond with **JSON only** in this exact form:
   ```json
   {"decisions": [{"orig_idx": N, "decision": "include|exclude", "rationale": "specific criterion cited", "study_design": "e.g. RCT"}]}
@@ -812,12 +815,12 @@ python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --save --inp
 > | Included | {included} |
 > | Excluded at full-text | {excluded_fulltext} |
 > | Pending (no PDF) | {pending_retrieval} |
-> | Low-confidence PDF matches | {low_confidence_count} |
+> | Low-confidence PDF matches | {low_confidence_count} (from the `--prepare` probe output) |
 
 If `pending_retrieval > 0`:
 > ⚠️ {pending_retrieval} articles could not be matched to a PDF. Check that PDFs are named by PMID (`{pmid}.pdf`) or DOI (`{doi_safe}.pdf`) and placed in `reviews/{SLUG}/pdfs/`. Re-run Stage 10 after adding missing PDFs.
 
-If `low_confidence_count > 0`:
+If `low_confidence_count > 0` (this key and `pdf_match_warnings` come from the `fulltext_assessor --prepare` probe output, not `--save`):
 > ⚠️ {low_confidence_count} PDFs had suspiciously short extracted text or low title-word coverage against the article. These were still assessed (the flag is advisory); the sub-agents were told to exclude only genuine wrong-PDF content. Inspect `pdf_match_warnings` in the prepare output and replace any truly mismatched PDFs in `reviews/{SLUG}/pdfs/`.
 
 Then reach **Checkpoint 5**.
@@ -852,8 +855,6 @@ After approval:
 > **Safe session break point.** Phase 4 (Enrichment + Quality Appraisal) is next. End this session when ready; resume with `/lit-review`."
 
 If ending: **→ Run Session Note Procedure before closing.**
-
-Update stage routing table: when status is `fulltext_assessed`, route to Checkpoint 5.
 
 ---
 
@@ -1214,6 +1215,13 @@ Then re-run **Stages 11–14** (data_extractor → enricher → quality_appraise
 extraction is additive, so the primary set's fields are preserved) and **Stage 15** (gap_analyzer),
 then return to **Checkpoint 6**.
 
+If `advancing_to_fulltext == 0`, `--merge` has still set status to `citation_chased`, and the review is stranded (Stage 16 requires `gap_analyzed`). Restore the pipeline status without adding articles: run **Stage 9** and **Stage 9.5** as above, then
+```bash
+python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --prepare --iteration-only
+python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --save --iteration-only --input-json '{"decisions": []}'
+```
+which sets status back to `fulltext_assessed`. Then re-run **Stages 11–15** as above to return to **Checkpoint 6**.
+
 If user chooses to proceed:
 > "✓ Proceeding to Phase 5: Synthesis + Output.
 >
@@ -1362,7 +1370,7 @@ Display:
 >
 > **Review complete. ✓**
 >
-> - Total included: {total_included} articles
+> - Total included: {included_articles} articles
 > - Executive summary: {executive_summary_words} words
 
 If any artifacts are missing:
@@ -1395,7 +1403,12 @@ Run at every safe session break point (Checkpoints 1–6). Appends one line to `
 
 **Step 2:** Read `state.json` to get `review_id`, `status`, and `raw_question`. Get today's date.
 
-**Step 3:** Append to `RUNLOG.md`:
+**Step 3:** Append to `RUNLOG.md`. If `RUNLOG.md` does not exist (it is gitignored, so it is absent on a fresh clone), create it first with this content:
+  ```
+  # Run Log
+
+  <!-- New entries go here -->
+  ```
 - If no heading for this review exists yet, insert a new block above `<!-- New entries go here -->`:
   ```
   ## {review_id}
@@ -1442,7 +1455,7 @@ as a GitHub issue in the repo — it's already captured in `RUNLOG.md`'s session
 ## Error Handling
 
 - If any script exits with code 2 (protocol_locked): explain the lock, do not re-run.
-- If any script exits with code 1 (general error): show the error message; check that NCBI_API_KEY is set in environment.
+- If any script exits with code 1 (general error): show the error message; check network connectivity and API keys (an `NCBI_API_KEY` is recommended for PubMed rate limits).
 - If `state.json` is missing or corrupt: tell the user to check `reviews/{SLUG}/` and offer to re-initialize if the review is new.
 
 ---
@@ -1450,7 +1463,7 @@ as a GitHub issue in the repo — it's already captured in `RUNLOG.md`'s session
 ## Environment Requirements
 
 ```
-NCBI_API_KEY             — required for Stage 4 (query_builder MeSH lookup) and Stage 5 (PubMed retrieval)
+NCBI_API_KEY             — recommended (PubMed works without it at a lower rate limit) for Stage 4 (query_builder MeSH lookup) and Stage 5 (PubMed retrieval)
 OPENALEX_EMAIL           — recommended for Stage 5 (polite pool; higher rate limits)
 CROSSREF_MAILTO          — recommended for Stage 6 (polite pool)
 SEMANTIC_SCHOLAR_API_KEY — recommended for Stage 5 (Semantic Scholar; the unauthenticated pool is often 429-limited). Legacy name S2_API_KEY still honored.

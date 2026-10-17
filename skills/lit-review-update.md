@@ -14,11 +14,11 @@ Update an existing **completed** systematic review with new literature published
 **Always start here:**
 
 ```bash
-python src/agent/state.py --scan reviews/
+python3 -m src.skills.packager --scan reviews/
 ```
 
-Present any completed reviews (`status=complete`). Ask:
-> "Which completed review would you like to update? I'll re-run the original search queries and screen only new articles."
+(`state.py --scan` skips completed reviews, so use the packager scan; it returns `{"reviews": [{review_id, review_type, raw_question, ...}]}` for every `status=complete` review.) The user may also pass a slug directly (`/lit-review-update <slug>`) — skip the scan then. Present the completed reviews. Ask:
+> "Which completed review would you like to update? I'll re-run the original PubMed query with a date filter and screen only new articles."
 
 If no completed reviews are found, offer to start a new review with `/lit-review` instead.
 
@@ -32,11 +32,11 @@ After the user selects a review, load its state and proceed to the Update Workfl
 
 Display the review summary:
 > "**Review:** {raw_question}
-> **Original search date:** {created_at}
+> **Original search date:** {last PubMed query timestamp, `r.queries.pubmed[-1].timestamp`}
 > **Included articles:** {prisma_counts.included}
-> **Original queries:** {queries.pubmed[-1].query_string} (PubMed), plus OpenAlex and Semantic Scholar
+> **Original query:** {queries.pubmed[-1].query_string} (PubMed)
 >
-> I will re-run these queries with a date filter from {created_at.year} to today, then screen only articles not in the existing screened set ({prisma_counts.screened} articles already seen).
+> I will re-run this query (PubMed only — the update does not re-query OpenAlex or Semantic Scholar) with a date filter from {search_date.year} to today, then screen only articles not in the existing screened set ({prisma_counts.screened} articles already seen).
 >
 > Proceed?"
 
@@ -62,11 +62,12 @@ EOF
 
 ### Step 3: Generate Update Queries
 
-Build a date-filtered version of the existing queries. Take the last PubMed query from state and append a date filter:
+Build a date-filtered version of the existing query. Take the last PubMed query from state and append a date filter. Back up the existing `gap_analysis.json` first — the stub below overwrites it:
 
 ```bash
 python - <<'EOF'
-import sys, json; sys.path.insert(0, ".")
+import sys, json, shutil; sys.path.insert(0, ".")
+from datetime import datetime, timezone
 from pathlib import Path
 from src.agent import state as sm
 from src.models.review import ReviewStatus
@@ -74,11 +75,15 @@ from src.models.review import ReviewStatus
 review_dir = Path("reviews/{SLUG}")
 r = sm.load(review_dir)
 
+# Back up the completed review's gap analysis before overwriting it
+gap_path = review_dir / "gap_analysis.json"
+if gap_path.exists():
+    shutil.copy2(gap_path, review_dir / "gap_analysis.pre_update.json")
+
 # Build date-filtered query
 original_query = r.queries.pubmed[-1].query_string if r.queries.pubmed else ""
-search_year = r.created_at.year
-from datetime import datetime
-current_year = datetime.utcnow().year
+search_year = r.queries.pubmed[-1].timestamp.year if r.queries.pubmed else r.created_at.year
+current_year = datetime.now(timezone.utc).year
 date_filtered = f"({original_query}) AND {search_year}:{current_year}[dp]"
 
 # Write as gap_analysis.json with one "suggested query"
@@ -106,7 +111,7 @@ EOF
 Confirm with the user:
 > "Update query: `{date_filtered_query}`
 >
-> This will search for articles published between {original_year} and today. Proceed?"
+> This will search PubMed for articles published between {search_year} and today. Proceed?"
 
 ### Step 4: Run Iteration (retrieve → screen → merge)
 
@@ -123,6 +128,25 @@ Read the JSON output.
 If `no_new_articles: true`:
 > "No new articles were found since the original search. The review is up to date."
 > Done — no further action needed.
+
+**Restore before stopping** (the review must not be left looking in-progress, and the stub must not replace the real gap analysis):
+```bash
+python3 - <<'EOF'
+import sys, shutil; sys.path.insert(0, ".")
+from pathlib import Path
+from src.agent import state as sm
+from src.models.review import ReviewStatus
+
+review_dir = Path("reviews/{SLUG}")
+backup = review_dir / "gap_analysis.pre_update.json"
+if backup.exists():
+    shutil.move(str(backup), str(review_dir / "gap_analysis.json"))
+r = sm.load(review_dir)
+r.status = ReviewStatus.complete
+sm.save(r, review_dir)
+print("Restored gap_analysis.json; status=complete.")
+EOF
+```
 
 **(b)** If `no_new_articles: false`, screen the `articles` candidates against the returned `pico`,
 `inclusion_criteria`, `exclusion_criteria`, and `screening_task` (same batching as Stage 8), producing:
@@ -148,6 +172,8 @@ Display (counts come from the `--merge` output):
 If `advancing_to_fulltext == 0`:
 > "No new articles were found that meet your inclusion criteria. The review is up to date."
 > Done — no further action needed.
+
+**Restore before stopping** — run the same restore snippet as the `no_new_articles` branch above.
 
 If `advancing_to_fulltext > 0`, continue to Step 5.
 
@@ -187,7 +213,7 @@ python3 -m src.skills.data_extractor --review-dir reviews/{SLUG} --prepare \
 python3 -m src.skills.data_extractor --review-dir reviews/{SLUG} --save \
   --batch-size 50 --offset 0 --input-json '{EXTRACTIONS_JSON}'
 ```
-Advance `--batch-offset` by 50 until `"complete": true`.
+Advance by 50 until `"complete": true` (`--batch-offset N` on `--prepare`, `--offset N` on every `--save`).
 
 **Stage 12 (enricher):** pure-data module, no `--prepare`/`--save` needed:
 ```bash
@@ -200,9 +226,9 @@ python3 -m src.skills.quality_appraiser --review-dir reviews/{SLUG} --prepare \
   --batch-size 50 --batch-offset 0
 # (Read articles array, apply appraisal_task, build {APPRAISALS_JSON})
 python3 -m src.skills.quality_appraiser --review-dir reviews/{SLUG} --save \
-  --batch-size 50 --batch-offset 0 --input-json '{APPRAISALS_JSON}'
+  --batch-size 50 --offset 0 --input-json '{APPRAISALS_JSON}'
 ```
-Advance `--batch-offset` by 50 until `"complete": true`.
+Advance by 50 until `"complete": true` (`--batch-offset N` on `--prepare`, `--offset N` on every `--save`).
 
 **Stage 14 (evidence_classifier):** pure-data module:
 ```bash
@@ -225,12 +251,13 @@ python3 -m src.skills.synthesizer --review-dir reviews/{SLUG} --save \
   --input-json '{SYNTHESIS_JSON}'
 ```
 
-**Stage 16 Step 2 (output_formatter):**
+**Stage 16 Step 2 (output_formatter):** mirror `/lit-review` Stage 16 Step 2. Run `--prepare`, write the updated executive summary following its `executive_summary_task` (preserve inline author-year citations), then save. `--save` writes `executive_summary` verbatim, so `{}` would overwrite the existing summary with an empty file:
 ```bash
 python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --prepare
 python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --save \
-  --input-json '{}'
+  --input-json '{"executive_summary": "<markdown>"}'
 ```
+Then remove the backup: `rm -f reviews/{SLUG}/gap_analysis.pre_update.json` (the normal path regenerates `gap_analysis.json` at Stage 15, so the backup is no longer needed).
 
 (Note: no `citation_chased` status reset is needed — `evidence_classified` is the correct upstream status for `gap_analyzer`.)
 
@@ -250,8 +277,8 @@ python3 -m src.skills.output_formatter --review-dir reviews/{SLUG} --save \
 ## Error Handling
 
 - If `gap_analysis.json` cannot be written (permissions): check that `reviews/{SLUG}/` is writable.
-- If `iteration_manager` returns `new_articles_found=0`: the review is current — no further action needed.
-- If the original queries are missing from state: reconstruct from `protocol.md` or `search_log.md`, then manually populate `gap_analysis.json`.
+- If `iteration_manager` returns `new_articles_found=0`: the review is current — run the restore snippet above, then stop.
+- If the original query is missing from state: reconstruct from `protocol.md` or `search_log.md`, then manually populate `gap_analysis.json`.
 
 ---
 
