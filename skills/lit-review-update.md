@@ -75,12 +75,14 @@ from src.models.review import ReviewStatus
 review_dir = Path("reviews/{SLUG}")
 r = sm.load(review_dir)
 
-# Back up the completed review's gap analysis before overwriting it. If a backup already
-# exists, an earlier update was interrupted and gap_analysis.json may already be the stub —
-# keep the existing backup, it is the only copy of the real gap analysis.
+# Back up the completed review's gap analysis before overwriting it. The stub written below
+# carries "update_stub": true; if gap_analysis.json is already a stub (an earlier update was
+# interrupted), keep the existing backup — it is the only copy of the real gap analysis.
+# Otherwise gap_analysis.json is the real one, so (re)write the backup from it.
 gap_path = review_dir / "gap_analysis.json"
 backup = review_dir / "gap_analysis.pre_update.json"
-if gap_path.exists() and not backup.exists():
+current_gap = json.loads(gap_path.read_text()) if gap_path.exists() else {}
+if gap_path.exists() and not current_gap.get("update_stub"):
     shutil.copy2(gap_path, backup)
 
 # Build date-filtered query
@@ -91,6 +93,7 @@ date_filtered = f"({original_query}) AND {search_year}:{current_year}[dp]"
 
 # Write as gap_analysis.json with one "suggested query"
 gap_data = {
+    "update_stub": True,
     "pico_gaps": [],
     "suggested_queries": [
         {
@@ -140,17 +143,20 @@ from pathlib import Path
 from src.agent import state as sm
 from src.models.article import Article
 from src.models.review import ReviewStatus
-from src.skills.output_formatter import _write_prisma_flow
+from src.skills.output_formatter import _recompute_prisma_from_articles, _write_prisma_flow
 
 review_dir = Path("reviews/{SLUG}")
 backup = review_dir / "gap_analysis.pre_update.json"
-if backup.exists():
-    shutil.move(str(backup), str(review_dir / "gap_analysis.json"))
+gap_path = review_dir / "gap_analysis.json"
+current_gap = json.loads(gap_path.read_text()) if gap_path.exists() else {}
+if backup.exists() and current_gap.get("update_stub"):
+    shutil.move(str(backup), str(gap_path))
 r = sm.load(review_dir)
 r.status = ReviewStatus.complete
+# --merge may have added newly screened (all excluded) records; recompute the exclusion
+# counts from articles_screened.json (as output_formatter does) and redraw the diagram.
+_recompute_prisma_from_articles(review_dir, r)
 sm.save(r, review_dir)
-# --merge may have added newly screened (all excluded) records to prisma_counts.screened;
-# regenerate the PRISMA diagram so it matches state.json.
 included = [Article(**a) for a in json.loads((review_dir / r.articles_included_file).read_text())]
 _write_prisma_flow(r, review_dir / "prisma_flow.md", included)
 print("Restored gap_analysis.json; status=complete; prisma_flow.md regenerated.")
@@ -163,8 +169,9 @@ EOF
 {"decisions": [{"article_index": N, "decision": "include|exclude|borderline", "reason": "1-2 sentences", "reason_category": "..."|null}]}
 ```
 
-**(c)** Merge the decisions (this appends screened articles, flags new includes as an iteration
-stream, and advances status to `fulltext_assessed`):
+**(c)** Merge the decisions (this appends screened articles and flags new includes/borderlines as
+an iteration stream; status becomes `citation_chased` if any advance, and stays `gap_analyzed` if
+none do):
 ```bash
 python -m src.skills.iteration_manager --review-dir reviews/{SLUG} --merge --decisions-json '{"decisions": [...]}'
 ```

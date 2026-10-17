@@ -32,7 +32,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.agent import state as state_manager
-from src.integrations.sources import DEFAULT_SOURCES, SOURCE_DISPLAY_NAMES
+from src.integrations.sources import display_names
 from src.models.article import Article
 from src.models.review import Review, ReviewStatus
 from src.skills._base import die, parse_save_input, prepare_output
@@ -69,11 +69,6 @@ def _today() -> str:
     return datetime.now(timezone.utc).strftime("%Y-%m-%d")
 
 
-def _source_names(review: Review) -> list[str]:
-    """Display names of the sources searched (defaults when state predates sources_searched)."""
-    return [SOURCE_DISPLAY_NAMES.get(s, s) for s in (review.sources_searched or DEFAULT_SOURCES)]
-
-
 def _write_prisma_flow(review: Review, output_path: Path, articles: list[Article]) -> None:
     p = review.prisma_counts
     # articles_included.json is the authoritative included set (both streams, post-full-text).
@@ -103,7 +98,7 @@ def _write_prisma_flow(review: Review, output_path: Path, articles: list[Article
         "",
         "### Stream 1: Databases and Registers",
         f"- Records identified via database searching: **{p.identified}**",
-        f"  - Sources: {', '.join(_source_names(review))}",
+        f"  - Sources: {', '.join(display_names(review.sources_searched))}",
         f"- Duplicate records removed: {max(0, p.identified - p.screened)}",
         "",
         "### Stream 2: Citation Searching",
@@ -283,7 +278,7 @@ def _stub_retrieval_list(review_dir: Path) -> None:
 def _write_ai_disclosure(review: Review, review_dir: Path) -> None:
     now = _today()
     review_type = review.review_type.value if review.review_type else "systematic"
-    sources = ", ".join(_source_names(review))
+    sources = ", ".join(display_names(review.sources_searched))
 
     lines = [
         "# AI-Assisted Review Disclosure (PRISMA-trAIce)",
@@ -504,7 +499,7 @@ def prepare(review_dir: Path) -> None:
         "review_type": review_type,
         "pico_text": pico_text,
         "search_summary": {
-            "databases": _source_names(review),
+            "databases": display_names(review.sources_searched),
             "identified": prisma.identified,
             "screened": prisma.screened,
             "eligibility": prisma.eligibility,
