@@ -26,10 +26,11 @@ from src.integrations.europepmc_client import EuropePMCClient
 from src.integrations.openalex_client import OpenAlexClient
 from src.integrations.pubmed_client import PubMedClient
 from src.integrations.semantic_scholar_client import SemanticScholarClient
+from src.integrations.sources import DEFAULT_SOURCES
+from src.integrations.sources import SOURCE_DISPLAY_NAMES as _DB_DISPLAY_NAMES
 from src.models.article import Article
 from src.models.review import ReviewStatus
 
-DEFAULT_SOURCES = ["pubmed", "openalex", "semantic_scholar"]
 DEFAULT_MAX_PER_SOURCE = 500
 
 
@@ -140,14 +141,6 @@ async def retrieve(
         "retrieval_errors": errors,
         "articles_raw_file": str(articles_raw_path),
     }
-
-
-_DB_DISPLAY_NAMES: dict[str, str] = {
-    "pubmed": "PubMed",
-    "openalex": "OpenAlex",
-    "semantic_scholar": "Semantic Scholar",
-    "europepmc": "Europe PMC",
-}
 
 
 def _write_hits_to_queries(

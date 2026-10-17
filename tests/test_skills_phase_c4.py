@@ -579,10 +579,30 @@ class TestIterationManagerMerge:
         # (scoped full-text assessment), held to the same gates as the primary set.
         _, review_dir = _make_review(tmp_path, status=ReviewStatus.gap_analyzed)
         _write_included(review_dir, [])
-        self._write_candidates(review_dir, [])
+        self._write_candidates(review_dir, [_make_article(doi="10.1/new")])
 
-        _capture_im_merge(capsys, review_dir, [])
+        _capture_im_merge(capsys, review_dir, [
+            {"article_index": 0, "decision": "include", "reason": "OK", "reason_category": None},
+        ])
         assert state_manager.load(review_dir).status == ReviewStatus.citation_chased
+
+    def test_nothing_advancing_stays_gap_analyzed(self, tmp_path, capsys):
+        # Regression: with every candidate excluded, merge() used to set citation_chased anyway,
+        # stranding the review (Stage 16 requires gap_analyzed) and forcing a full Stage 9–15
+        # replay just to restore the status. The screening is still recorded.
+        _, review_dir = _make_review(tmp_path, status=ReviewStatus.gap_analyzed)
+        _write_included(review_dir, [])
+        self._write_candidates(review_dir, [_make_article(doi="10.1/new")], updated_seen=["doi:10.1/new"])
+
+        out = _capture_im_merge(capsys, review_dir, [
+            {"article_index": 0, "decision": "exclude", "reason": "Off-topic", "reason_category": "other"},
+        ])
+        review = state_manager.load(review_dir)
+        assert out["advancing_to_fulltext"] == 0
+        assert review.status == ReviewStatus.gap_analyzed
+        assert review.prisma_counts.screened == 1
+        assert review.iterations == 1
+        assert "doi:10.1/new" in review.seen_article_ids
 
     def test_merge_flags_iteration_candidates_without_adding_to_included(self, tmp_path, capsys):
         # New candidates are flagged iteration_added in articles_screened.json but must NOT be

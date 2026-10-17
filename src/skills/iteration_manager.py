@@ -8,7 +8,8 @@ New includes are merged into articles_included.json; PRISMA counts and iteration
 Input:  review_dir (status must be gap_analyzed; iterations < max_iterations)
 Output (--retrieve): candidates for Claude to screen + writes _iteration_candidates.json
 Output (--merge):    articles_screened.json (appended, include+borderline flagged iteration_added),
-                     state=citation_chased. New candidates then re-enter Stage 9 → 9.5 → 10
+                     state=citation_chased when any include/borderline advances (stays
+                     gap_analyzed when none do). New candidates then re-enter Stage 9 → 9.5 → 10
                      (fulltext_assessor --iteration-only appends only survivors) — same two gates
                      as the primary set. --merge does NOT write articles_included.json.
 CLI:
@@ -135,7 +136,7 @@ async def _retrieve_async(review_dir: Path) -> None:
     if review.iterations >= review.max_iterations:
         die(
             f"Max iterations ({review.max_iterations}) already reached. "
-            "Proceed to synthesis or increase max_iterations in settings.yaml."
+            "Proceed to synthesis or increase max_iterations in this review's state.json."
         )
 
     gap_path = review_dir / "gap_analysis.json"
@@ -267,10 +268,14 @@ def merge(review_dir: Path, decisions_json: str) -> None:
     review.prisma_counts.screened += len(screened_articles)
     review.seen_article_ids = list(updated_seen)
     review.iterations += 1
+    advancing = len(new_includes) + len(new_borderlines)
     # citation_chased: re-enter the normal Stage 9 (retrieval list) → 9.5 (PDF) → 10 (full-text)
     # flow so the new iteration candidates are held to the SAME two gates (abstract + full text)
     # as the primary set. The scoped `--iteration-only` Stage-10 pass appends only survivors.
-    review.status = ReviewStatus.citation_chased
+    # With nothing advancing there is nothing for that flow to do, so stay at gap_analyzed and
+    # return straight to the Checkpoint 6 decision.
+    if advancing:
+        review.status = ReviewStatus.citation_chased
     state_manager.save(review, review_dir)
 
     candidates_path.unlink()
@@ -282,7 +287,7 @@ def merge(review_dir: Path, decisions_json: str) -> None:
         "new_includes": len(new_includes),
         # Include + borderline both advance to the scoped full-text pass; these are NOT final
         # includes yet (they must clear Stage 10 first).
-        "advancing_to_fulltext": len(new_includes) + len(new_borderlines),
+        "advancing_to_fulltext": advancing,
     }))
 
 

@@ -36,6 +36,18 @@ def test_scan_returns_complete_reviews(tmp_path):
     assert "beta-2026-05" not in slugs
 
 
+def test_scan_reports_folder_name_when_it_differs_from_review_id(tmp_path):
+    # Skills address reviews by folder (reviews/{SLUG}); review_id alone can't locate one.
+    folder = tmp_path / "reviews" / "hf-readmit"
+    folder.mkdir(parents=True)
+    (folder / "state.json").write_text(json.dumps({
+        "review_id": "hf-readmission-2026", "raw_question": "q", "status": "complete"
+    }))
+    payload = json.loads(run_packager("--scan", str(tmp_path / "reviews")).stdout)
+    assert payload["reviews"][0]["slug"] == "hf-readmit"
+    assert payload["reviews"][0]["review_id"] == "hf-readmission-2026"
+
+
 def test_scan_handles_missing_directory(tmp_path):
     result = run_packager("--scan", str(tmp_path / "does-not-exist"))
     assert result.returncode == 0

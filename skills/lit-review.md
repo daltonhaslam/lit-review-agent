@@ -1215,12 +1215,7 @@ Then re-run **Stages 11–14** (data_extractor → enricher → quality_appraise
 extraction is additive, so the primary set's fields are preserved) and **Stage 15** (gap_analyzer),
 then return to **Checkpoint 6**.
 
-If `advancing_to_fulltext == 0`, `--merge` has still set status to `citation_chased`, and the review is stranded (Stage 16 requires `gap_analyzed`). Restore the pipeline status without adding articles: run **Stage 9** and **Stage 9.5** as above, then
-```bash
-python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --prepare --iteration-only
-python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --save --iteration-only --input-json '{"decisions": []}'
-```
-which sets status back to `fulltext_assessed`. Then re-run **Stages 11–15** as above to return to **Checkpoint 6**.
+If `advancing_to_fulltext == 0`, `--merge` leaves status at `gap_analyzed` (the screened candidates are still recorded in `articles_screened.json` and `prisma_counts.screened`). Return directly to **Checkpoint 6** — iterate again or proceed to synthesis.
 
 If user chooses to proceed:
 > "✓ Proceeding to Phase 5: Synthesis + Output.
