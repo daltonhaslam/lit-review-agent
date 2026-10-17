@@ -350,6 +350,7 @@ class TestS2SearchPaper:
 # enrich_cc CLI mode
 # ---------------------------------------------------------------------------
 
+@pytest.mark.usefixtures("no_citation_metadata_network")
 class TestEnrichCC:
     def test_enrich_cc_updates_screened_file(self, tmp_path, capsys):
         _, review_dir = _make_review(tmp_path)
