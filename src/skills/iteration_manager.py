@@ -27,7 +27,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from src.agent import state as state_manager
-from src.integrations.config import load_api_config
+from src.integrations.config import APIConfig, load_api_config
 from src.integrations.pubmed_client import PubMedClient
 from src.models.article import Article, ScreeningDecision
 from src.models.review import Review, ReviewStatus
@@ -93,13 +93,13 @@ async def _fetch_query(
 
 
 async def _retrieve_for_queries(
-    cfg: dict,
+    cfg: APIConfig,
     queries: list[str],
     seen_ids: set[str],
     max_per_query: int = 200,
 ) -> tuple[list[Article], dict[str, int], set[str]]:
     """Search PubMed for each query in parallel; return only articles not in seen_ids."""
-    client = PubMedClient(cfg.get("ncbi_api_key", ""))
+    client = PubMedClient(cfg.ncbi_api_key)
 
     results = await asyncio.gather(*[
         _fetch_query(client, q, max_per_query) for q in queries
