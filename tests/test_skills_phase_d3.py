@@ -163,6 +163,37 @@ class TestAIDisclosureGeneration:
     def test_ai_disclosure_in_expected_artifacts(self):
         assert "ai_disclosure.md" in _EXPECTED_ARTIFACTS
 
+    def test_ai_disclosure_states_actual_batch_size(self, tmp_path):
+        review, review_dir = _make_review(tmp_path, status=ReviewStatus.synthesized)
+        _write_ai_disclosure(review, review_dir)
+        content = (review_dir / "ai_disclosure.md").read_text()
+        assert "~20 articles" not in content
+        assert content.count("50 articles per batch") == 3  # Stages 8, 11, 13
+
+    def test_ai_disclosure_lists_only_sources_searched(self, tmp_path):
+        review, review_dir = _make_review(tmp_path, status=ReviewStatus.synthesized)
+        _write_ai_disclosure(review, review_dir)
+        stage5 = next(
+            line for line in (review_dir / "ai_disclosure.md").read_text().splitlines()
+            if line.startswith("- Stage 5:")
+        )
+        assert "PubMed, OpenAlex, Semantic Scholar" in stage5
+        assert "Europe PMC" not in stage5
+
+        review.sources_searched = ["pubmed", "europepmc"]
+        _write_ai_disclosure(review, review_dir)
+        content = (review_dir / "ai_disclosure.md").read_text()
+        assert "API calls — PubMed, Europe PMC)" in content
+
+    def test_ai_disclosure_lists_full_pdf_waterfall(self, tmp_path):
+        review, review_dir = _make_review(tmp_path, status=ReviewStatus.synthesized)
+        _write_ai_disclosure(review, review_dir)
+        content = (review_dir / "ai_disclosure.md").read_text()
+        assert (
+            "existing OA link → Unpaywall → OpenAlex → PubMed Central → Europe PMC → Crossref"
+            in content
+        )
+
 
 # ===========================================================================
 # TestSafeReviewDir
