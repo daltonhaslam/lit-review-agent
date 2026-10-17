@@ -149,7 +149,7 @@ review_dir = Path("reviews/{SLUG}")
 backup = review_dir / "gap_analysis.pre_update.json"
 gap_path = review_dir / "gap_analysis.json"
 current_gap = json.loads(gap_path.read_text()) if gap_path.exists() else {}
-if backup.exists() and current_gap.get("update_stub"):
+if backup.exists() and (not gap_path.exists() or current_gap.get("update_stub")):
     shutil.move(str(backup), str(gap_path))
 r = sm.load(review_dir)
 r.status = ReviewStatus.complete
