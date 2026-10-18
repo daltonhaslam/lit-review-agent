@@ -73,6 +73,12 @@ The suite passes unchanged on pypdf 6.21, lxml 6.1, pytest 9.1 and pytest-asynci
 unused: `aiohttp` and `python-dateutil`. Recommendation: bump pypdf to `<7`, drop lxml,
 aiohttp and dateutil.
 
+**Follow-up (2026-10-18, maintainer approved):** pypdf is now `>=6.19,<7` (6.19.0 is the
+highest fix version among its advisories), and lxml, aiohttp and python-dateutil are
+removed. In a fresh venv, `pip-audit` reports only the dev-only pytest advisory. The suite
+passes on 3.11 and 3.9. On 40 local article PDFs, text extraction with 6.21 finds the same
+DOIs as 6.10, and text length changes by under 2% (whitespace).
+
 ## Tests
 
 | | Before | After |
