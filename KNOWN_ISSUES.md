@@ -76,8 +76,7 @@ _Last reviewed: 2026-10-17_
   `tests/conftest.py` blocks non-loopback network access.
 - **Python version.** The test suite passes on Python 3.11 (primary) and on macOS's
   system Python 3.9. Other versions are untested.
-- **Dependency advisories.** `requirements.txt` caps `pypdf<6` and `lxml<6`. The
-  newest allowed versions (pypdf 5.9, lxml 5.4) carry published advisories that
-  are fixed only in the next major versions. pypdf parses downloaded PDFs. lxml
-  is not imported by the code. The test suite passes on pypdf 6, lxml 6, and
-  pytest 9, but the major bump hasn't been made yet.
+- **Dependency advisories.** `pip-audit` reports one advisory, in the dev-only
+  `pytest<9` cap (a shared `/tmp` directory; fixed in pytest 9). The suite passes
+  on pytest 9, but the bump hasn't been made yet. Runtime dependencies are clean
+  (pypdf `>=6.19` clears its parsing advisories).
