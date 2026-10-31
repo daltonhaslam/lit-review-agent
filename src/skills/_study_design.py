@@ -181,6 +181,9 @@ def canonicalize_study_design(raw: str | None) -> str | None:
         return s
     if s in _LEGACY_LABEL_MAP:
         return _LEGACY_LABEL_MAP[s]
+    # Checked before the length scan: "retrospective cohort with historical controls" is III-3.
+    if "historical control" in s:
+        return "historical_control"
     for legacy_key, canonical in _LEGACY_LABEL_PAIRS_BY_LENGTH:
         if legacy_key in s:
             return canonical

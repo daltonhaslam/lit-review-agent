@@ -312,7 +312,7 @@ Eleven files in `reviews/{slug}/` on completion: ten are written/verified at Sta
 
 ### NHMRC Evidence Levels (applied by `evidence_classifier`)
 
-Reference definitions (NHMRC 2009). The classifier's actual design-to-level mapping differs in places; see "How the classifier maps study designs (implementation)" in `docs/evidence_reference.md`. In brief: interrupted time series and controlled before-after map to III-1; prospective cohort and comparative study to III-2; retrospective cohort, case-control, and historical control to III-3; designs the table does not cover (cross-sectional, qualitative, mixed methods, survey) default to IV.
+Reference definitions (NHMRC 2009). The classifier's actual design-to-level mapping differs in places; see "How the classifier maps study designs (implementation)" in `docs/evidence_reference.md`. In brief: interrupted time series and controlled before-after map to III-1; prospective cohort, retrospective cohort, case-control, and comparative study to III-2; historical control to III-3; designs the table does not cover (cross-sectional, qualitative, mixed methods, survey) default to IV.
 
 | Level | Study Design |
 |---|---|

@@ -105,6 +105,13 @@ class TestCanonicalize:
 # ---------------------------------------------------------------------------
 
 class TestVocabularyIntegrity:
+    @pytest.mark.parametrize("raw", [
+        "retrospective cohort study with historical controls",
+        "prospective cohort study with historical controls",
+    ])
+    def test_historical_control_wins_over_cohort(self, raw):
+        assert canonicalize_study_design(raw) == "historical_control"
+
     def test_every_canonical_has_nhmrc_mapping(self):
         missing = [d for d in CANONICAL_STUDY_DESIGNS if d not in CANONICAL_TO_NHMRC]
         assert missing == [], f"canonical IDs missing NHMRC mapping: {missing}"
