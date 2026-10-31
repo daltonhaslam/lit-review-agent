@@ -45,9 +45,8 @@ _Last reviewed: 2026-10-17_
 
 ## Classification and labels
 
-- **NHMRC mapping differs from the NHMRC 2009 table.** Retrospective cohort and
-  case-control studies map to III-3, not III-2. Interrupted time series and
-  controlled before-after studies map to III-1. See "How the classifier maps
+- **NHMRC mapping differs from the NHMRC 2009 table.** Interrupted time series
+  and controlled before-after studies map to III-1. See "How the classifier maps
   study designs" in [`docs/evidence_reference.md`](docs/evidence_reference.md).
   This is pending maintainer review.
 - **`review_type` and `screening_mode` are labels.** Both are stored and shape the

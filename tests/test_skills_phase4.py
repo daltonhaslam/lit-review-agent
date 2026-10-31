@@ -398,11 +398,14 @@ class TestClassifyLevel:
     def test_prospective_cohort_is_level_III2(self):
         assert classify_level("Prospective cohort study") == EvidenceLevel.level_III_2
 
-    def test_retrospective_cohort_is_level_III3(self):
-        assert classify_level("Retrospective cohort study") == EvidenceLevel.level_III_3
+    def test_retrospective_cohort_is_level_III2(self):
+        assert classify_level("Retrospective cohort study") == EvidenceLevel.level_III_2
 
-    def test_case_control_is_level_III3(self):
-        assert classify_level("Case-control study") == EvidenceLevel.level_III_3
+    def test_case_control_is_level_III2(self):
+        assert classify_level("Case-control study") == EvidenceLevel.level_III_2
+
+    def test_historical_control_is_level_III3(self):
+        assert classify_level("Cohort study with historical controls") == EvidenceLevel.level_III_3
 
     def test_case_series_is_level_IV(self):
         assert classify_level("Case series") == EvidenceLevel.level_IV

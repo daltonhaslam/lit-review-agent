@@ -136,8 +136,9 @@ class TestClassifierWithCanonicalIds:
         ("quasi_rct", EvidenceLevel.level_III_1),
         ("interrupted_time_series", EvidenceLevel.level_III_1),
         ("prospective_cohort", EvidenceLevel.level_III_2),
-        ("retrospective_cohort", EvidenceLevel.level_III_3),
-        ("case_control", EvidenceLevel.level_III_3),
+        ("retrospective_cohort", EvidenceLevel.level_III_2),
+        ("case_control", EvidenceLevel.level_III_2),
+        ("historical_control", EvidenceLevel.level_III_3),
         ("case_series", EvidenceLevel.level_IV),
         ("narrative_review", EvidenceLevel.level_IV),
         ("scoping_review", EvidenceLevel.level_IV),
@@ -149,7 +150,7 @@ class TestClassifierWithCanonicalIds:
 
     def test_legacy_freetext_still_routes(self):
         # Backwards compat: existing reviews carry free-text labels; substring fallback still works.
-        assert classify_level("retrospective cohort study") == EvidenceLevel.level_III_3
+        assert classify_level("retrospective cohort study") == EvidenceLevel.level_III_2
         assert classify_level("randomized controlled trial") == EvidenceLevel.level_II
 
     def test_unknown_returns_unknown(self):

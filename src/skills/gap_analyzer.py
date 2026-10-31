@@ -72,8 +72,8 @@ def _build_evidence_map(articles: list[Article]) -> dict[str, dict[str, int]]:
         EvidenceLevel.level_I: "Systematic review / meta-analysis",
         EvidenceLevel.level_II: "RCT",
         EvidenceLevel.level_III_1: "Non-randomized trial",
-        EvidenceLevel.level_III_2: "Prospective cohort",
-        EvidenceLevel.level_III_3: "Retrospective cohort / case-control",
+        EvidenceLevel.level_III_2: "Cohort / case-control",
+        EvidenceLevel.level_III_3: "Historical control",
         EvidenceLevel.level_IV: "Case series / expert opinion",
         EvidenceLevel.unknown: "Unknown",
     }

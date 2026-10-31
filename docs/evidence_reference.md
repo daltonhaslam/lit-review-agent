@@ -27,11 +27,11 @@ The definitions above are the NHMRC 2009 reference. `evidence_classifier` does n
 | I | systematic review, meta-analysis, umbrella review |
 | II | RCT, cluster RCT |
 | III-1 | quasi-RCT, non-randomized trial, controlled before-after, interrupted time series |
-| III-2 | prospective cohort, comparative study |
-| III-3 | retrospective cohort, case-control, historical control |
+| III-2 | prospective cohort, retrospective cohort, case-control, comparative study |
+| III-3 | historical control |
 | IV | case series, case report, cross-sectional, qualitative, mixed methods, survey, economic evaluation, narrative/scoping review, editorial, commentary, letter, expert opinion, program description, QI report |
 
-**Known deviation, pending maintainer review:** compared with the reference table above, the code places retrospective cohort and case-control studies one level lower (III-3, not III-2), and places interrupted time series and controlled before-after one level higher (III-1, not III-2/III-3 depending on a parallel control). Designs the reference table does not cover (cross-sectional, qualitative, survey, economic evaluation) default to IV.
+**Known deviation, pending maintainer review:** compared with the reference table above, the code places interrupted time series and controlled before-after one level higher (III-1, not III-2/III-3 depending on a parallel control). Designs the reference table does not cover (cross-sectional, qualitative, survey, economic evaluation) default to IV.
 
 **"Highest available" principle:** The focus is on determining the highest *available* level of evidence. Many clinical questions cannot achieve Level I/II. Level III or IV evidence may be the best available and still clinically actionable. Document this clearly in the executive summary.
 

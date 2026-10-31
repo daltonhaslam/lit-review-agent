@@ -1108,8 +1108,8 @@ NHMRC hierarchy:
 - Level I: Systematic reviews / meta-analyses
 - Level II: RCTs
 - Level III-1: Pseudo-randomised trials
-- Level III-2: Prospective comparative studies
-- Level III-3: Retrospective cohort, case-control
+- Level III-2: Comparative studies with concurrent controls (cohort, case-control)
+- Level III-3: Comparative studies without concurrent controls (historical control)
 - Level IV: Case series, expert opinion, narrative reviews
 
 Display:

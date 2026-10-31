@@ -7,8 +7,8 @@ NHMRC hierarchy:
   Level I    — Systematic reviews / meta-analyses of RCTs
   Level II   — RCTs (individual)
   Level III-1 — Pseudo-randomised / non-randomised trials
-  Level III-2 — Comparative studies with concurrent controls (prospective cohort, controlled BA)
-  Level III-3 — Comparative studies without concurrent controls (retrospective cohort, case-control)
+  Level III-2 — Comparative studies with concurrent controls (cohort, case-control)
+  Level III-3 — Comparative studies without concurrent controls (historical control)
   Level IV   — Case series, cross-sectional (descriptive), expert opinion, narrative review
 
 No LLM calls. Pure rule-based classification from study_design string.
@@ -59,11 +59,11 @@ _LEVEL_III2_KEYWORDS = {
     "prospective cohort", "prospective study",
     "comparative study", "controlled study",
     "concurrent control", "parallel group",
-}
-_LEVEL_III3_KEYWORDS = {
     "retrospective cohort", "cohort study",
     "case-control", "case control",
     "nested case-control",
+}
+_LEVEL_III3_KEYWORDS = {
     "historical control",
 }
 _LEVEL_IV_KEYWORDS = {
@@ -90,10 +90,11 @@ def classify_level(study_design: str | None) -> EvidenceLevel:
         return EvidenceLevel.level_III_1
     if any(k in sd for k in _LEVEL_II_KEYWORDS):
         return EvidenceLevel.level_II
-    if any(k in sd for k in _LEVEL_III2_KEYWORDS):
-        return EvidenceLevel.level_III_2
+    # III-3 checked before III-2: "cohort study with historical controls" has no concurrent control
     if any(k in sd for k in _LEVEL_III3_KEYWORDS):
         return EvidenceLevel.level_III_3
+    if any(k in sd for k in _LEVEL_III2_KEYWORDS):
+        return EvidenceLevel.level_III_2
     if any(k in sd for k in _LEVEL_IV_KEYWORDS):
         return EvidenceLevel.level_IV
     return EvidenceLevel.unknown

@@ -127,8 +127,8 @@ _LEVEL_LABELS = {
     EvidenceLevel.level_I: "SR/MA",
     EvidenceLevel.level_II: "RCT",
     EvidenceLevel.level_III_1: "Non-RCT",
-    EvidenceLevel.level_III_2: "Prospective cohort",
-    EvidenceLevel.level_III_3: "Retrospective",
+    EvidenceLevel.level_III_2: "Cohort/case-control",
+    EvidenceLevel.level_III_3: "Historical control",
     EvidenceLevel.level_IV: "Case series/other",
     EvidenceLevel.unknown: "Unknown",
 }

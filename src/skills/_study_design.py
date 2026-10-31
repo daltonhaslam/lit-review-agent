@@ -20,9 +20,9 @@ CANONICAL_STUDY_DESIGNS: tuple[str, ...] = (
     # Level III-1
     "quasi_rct", "non_randomized_trial", "controlled_before_after", "interrupted_time_series",
     # Level III-2
-    "prospective_cohort", "comparative_study",
+    "prospective_cohort", "comparative_study", "retrospective_cohort", "case_control",
     # Level III-3
-    "retrospective_cohort", "case_control", "historical_control",
+    "historical_control",
     # Level IV (descriptive, qualitative, opinion, methodology-light)
     "case_series", "case_report", "cross_sectional", "qualitative", "mixed_methods",
     "narrative_review", "scoping_review", "editorial", "commentary", "letter",
@@ -43,8 +43,8 @@ CANONICAL_TO_NHMRC: dict[str, EvidenceLevel] = {
     "interrupted_time_series": EvidenceLevel.level_III_1,
     "prospective_cohort": EvidenceLevel.level_III_2,
     "comparative_study": EvidenceLevel.level_III_2,
-    "retrospective_cohort": EvidenceLevel.level_III_3,
-    "case_control": EvidenceLevel.level_III_3,
+    "retrospective_cohort": EvidenceLevel.level_III_2,
+    "case_control": EvidenceLevel.level_III_2,
     "historical_control": EvidenceLevel.level_III_3,
     "case_series": EvidenceLevel.level_IV,
     "case_report": EvidenceLevel.level_IV,
@@ -108,7 +108,6 @@ _LEGACY_LABEL_MAP: dict[str, str] = {
     "prospective study": "prospective_cohort",
     "comparative study": "comparative_study",
     "controlled study": "comparative_study",
-    # Level III-3
     "nested case-control": "case_control",
     "nested case control": "case_control",
     "retrospective comparative cohort": "retrospective_cohort",
@@ -118,6 +117,7 @@ _LEGACY_LABEL_MAP: dict[str, str] = {
     "cohort study": "retrospective_cohort",
     "case-control": "case_control",
     "case control": "case_control",
+    # Level III-3
     "historical control": "historical_control",
     # Level IV
     "qualitative interview study": "qualitative",

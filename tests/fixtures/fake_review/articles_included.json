@@ -18,7 +18,7 @@
     "pmid": "2", "doi": "10.1/b", "title": "Cost evaluation of teleconsult in NICU",
     "authors": ["Pires Ana"], "year": 2025,
     "journal": "JAMA Pediatrics",
-    "study_design": "retrospective_cohort", "evidence_level": "III-3", "quality_score": 0.55,
+    "study_design": "retrospective_cohort", "evidence_level": "III-2", "quality_score": 0.55,
     "quality_instrument": "STROBE", "sample_size": 790,
     "tldr": "Mortality fell after daily telerounding.",
     "intervention_details": "Daily telerounding by tertiary intensivists.",

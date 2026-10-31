@@ -425,7 +425,7 @@ def test_findings_by_outcome_groups_canonical_cards():
          "study_design": "rct", "evidence_level": "II",
          "tldr": "marcin tldr", "primary_outcomes": ["X"], "effect_sizes": "ES"},
         {"pmid": "2", "authors": ["Pires Ana"], "year": 2025, "title": "T2",
-         "study_design": "retrospective_cohort", "evidence_level": "III-3",
+         "study_design": "retrospective_cohort", "evidence_level": "III-2",
          "tldr": "pires tldr", "primary_outcomes": ["X"], "effect_sizes": "ES"},
     ]
     by_outcome = [
