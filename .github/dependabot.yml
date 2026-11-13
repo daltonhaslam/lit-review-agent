@@ -1,0 +1,13 @@
+# Monthly, one grouped PR per ecosystem (Tier B4, 2026-10-17; scope set 2026-11-13); 7-day cooldown. No auto-merge.
+version: 2
+updates:
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    cooldown:
+      default-days: 7  # skip releases younger than a week (supply-chain buffer); security updates are not delayed
+    open-pull-requests-limit: 3
+    groups:
+      pip-all:
+        patterns: ["*"]
