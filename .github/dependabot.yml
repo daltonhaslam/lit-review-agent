@@ -8,6 +8,9 @@ updates:
     cooldown:
       default-days: 7  # skip releases younger than a week (supply-chain buffer); security updates are not delayed
     open-pull-requests-limit: 3
+    # Don't raise floors in requirements.txt: README promises Python 3.9+, and newer floors
+    # (pydantic 2.14, pytest 9, pypdf 7, rapidfuzz 3.14.6) need 3.10+ (PR #2 closed 2026-11-16).
+    versioning-strategy: increase-if-necessary
     groups:
       pip-all:
         patterns: ["*"]
