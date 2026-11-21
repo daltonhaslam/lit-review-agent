@@ -465,7 +465,6 @@ If borderlines > 0:
 
 **Stage 8 complete.** Before proceeding:
 1. Review the screening summary above. Does it look correct?
-2. **Context check:** If you have been screening a large article set (many batches), consider whether this session should end here. Starting Stage 8.5 is quick but a fresh session always helps.
 
 > "Abstract screening complete. {include} includes, {borderline} borderline, {exclude} excluded. Would you like to continue to Stage 8.5 (Citation Chasing), or end this session and resume later?"
 

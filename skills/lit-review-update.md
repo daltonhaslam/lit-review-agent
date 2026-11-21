@@ -45,7 +45,7 @@ Display the review summary:
 Set status back to `gap_analyzed` so `iteration_manager` can run:
 
 ```bash
-python - <<'EOF'
+python3 - <<'EOF'
 import sys; sys.path.insert(0, ".")
 from pathlib import Path
 from src.agent import state as sm
@@ -65,7 +65,7 @@ EOF
 Build a date-filtered version of the existing query. Take the last PubMed query from state and append a date filter. Back up the existing `gap_analysis.json` first — the stub below overwrites it:
 
 ```bash
-python - <<'EOF'
+python3 - <<'EOF'
 import sys, json, shutil; sys.path.insert(0, ".")
 from datetime import datetime, timezone
 from pathlib import Path
@@ -127,7 +127,7 @@ required", and `--retrieve` alone never produces `new_includes`. Mirror `/lit-re
 
 **(a)** Retrieve the date-filtered new literature:
 ```bash
-python -m src.skills.iteration_manager --review-dir reviews/{SLUG} --retrieve
+python3 -m src.skills.iteration_manager --review-dir reviews/{SLUG} --retrieve
 ```
 Read the JSON output.
 
@@ -173,7 +173,7 @@ EOF
 an iteration stream; status becomes `citation_chased` if any advance, and stays `gap_analyzed` if
 none do):
 ```bash
-python -m src.skills.iteration_manager --review-dir reviews/{SLUG} --merge --decisions-json '{"decisions": [...]}'
+python3 -m src.skills.iteration_manager --review-dir reviews/{SLUG} --merge --decisions-json '{"decisions": [...]}'
 ```
 
 Display (counts come from the `--merge` output):
@@ -202,17 +202,17 @@ full-text sub-flow, then the extraction stages:
 1. **Stage 9 → 9.5** — regenerate the retrieval list and download PDFs for the new candidates
    (idempotent; skips PDFs already on disk):
    ```bash
-   python -m src.skills.retrieval_list_generator --review-dir reviews/{SLUG}
-   python -m src.skills.pdf_downloader --review-dir reviews/{SLUG}
+   python3 -m src.skills.retrieval_list_generator --review-dir reviews/{SLUG}
+   python3 -m src.skills.pdf_downloader --review-dir reviews/{SLUG}
    ```
    (Candidates that land in `library_request.csv` with no PDF cannot be full-text assessed and stay
    out of the included set — same rule as the original review.)
 2. **Stage 10 (scoped)** — assess ONLY the new candidates and append survivors (never re-assess the
    original included set):
    ```bash
-   python -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --prepare --iteration-only
+   python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --prepare --iteration-only
    # assess each returned article, then:
-   python -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --save --iteration-only \
+   python3 -m src.skills.fulltext_assessor --review-dir reviews/{SLUG} --save --iteration-only \
      --input-json '{"decisions": [{"orig_idx": N, "decision": "include|exclude", "rationale": "...", "study_design": "..."}]}'
    ```
 3. Then re-run **Stages 11–16** (data_extractor → enricher → quality_appraiser → evidence_classifier

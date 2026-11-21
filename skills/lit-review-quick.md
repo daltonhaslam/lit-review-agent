@@ -28,7 +28,7 @@ Present in-progress reviews (if any); offer to resume or start new. If starting 
 ## Quick Initialization
 
 ```bash
-python - <<'EOF'
+python3 - <<'EOF'
 import sys, json
 from pathlib import Path
 sys.path.insert(0, ".")
@@ -63,14 +63,14 @@ Ask three questions (not four — skip Fundamental Four):
 Then format context for Claude (`--prepare`), build the PICO, and save it (`--save`) — the
 two-call pattern; a bare invocation exits with "one of the arguments --prepare --save is required":
 ```bash
-python -m src.skills.pico_refiner \
+python3 -m src.skills.pico_refiner \
   --review-dir reviews/{SLUG} \
   --answers-json '{"what_we_know": "", "what_we_dont_know": "{QUESTION}", "what_we_should_know": "{QUESTION}", "why_we_should_know": "rapid landscape"}' \
   --prepare
 ```
 Read the JSON output and build the full PICO(S) framework, then save:
 ```bash
-python -m src.skills.pico_refiner --review-dir reviews/{SLUG} --save --input-json '{FULL_PICO_JSON}'
+python3 -m src.skills.pico_refiner --review-dir reviews/{SLUG} --save --input-json '{FULL_PICO_JSON}'
 ```
 
 Present PICO; ask for confirmation. No protocol generation step.
@@ -85,18 +85,18 @@ Build queries (two-call `--prepare`/`--save`; a bare invocation exits with
 "one of the arguments --prepare --save is required"):
 
 ```bash
-python -m src.skills.query_builder --review-dir reviews/{SLUG} --prepare
+python3 -m src.skills.query_builder --review-dir reviews/{SLUG} --prepare
 ```
 Read the JSON output, build the per-source queries, then save:
 ```bash
-python -m src.skills.query_builder --review-dir reviews/{SLUG} --save \
+python3 -m src.skills.query_builder --review-dir reviews/{SLUG} --save \
   --input-json '{"pubmed_steps": [...], "openalex_query": "...", "semantic_scholar_query": "...", "europepmc_query": "..."}'
 ```
 
 Then retrieve:
 
 ```bash
-python -m src.skills.multi_source_retriever \
+python3 -m src.skills.multi_source_retriever \
   --review-dir reviews/{SLUG} \
   --sources pubmed,openalex,semantic_scholar \
   --max-per-source 150 \
@@ -110,8 +110,8 @@ Show the per-source counts with their `source_status` (`ok` / `empty` / `degrade
 Followed by aggregation and deduplication:
 
 ```bash
-python -m src.skills.aggregator --review-dir reviews/{SLUG}
-python -m src.skills.deduplicator --review-dir reviews/{SLUG}
+python3 -m src.skills.aggregator --review-dir reviews/{SLUG}
+python3 -m src.skills.deduplicator --review-dir reviews/{SLUG}
 ```
 
 Display the deduplication result from the deduplicator output: "{before} records retrieved, {removed} duplicates removed, **{after} identified (after deduplication)**." Note that `prisma_counts.identified` is the post-dedup count, so `prisma_flow.md`'s duplicates-removed and full-text-assessed lines are not meaningful on the quick path.
@@ -123,7 +123,7 @@ Display the deduplication result from the deduplicator output: "{before} records
 Screen abstracts in batches of 20. Get the first batch:
 
 ```bash
-python -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
+python3 -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
   --batch-size 20 --batch-offset 0
 ```
 
@@ -131,7 +131,7 @@ python -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
 
 **Step 1** (skip on first iteration): Get next batch:
 ```bash
-python -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
+python3 -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
   --batch-size 20 --batch-offset {CURRENT_OFFSET}
 ```
 
@@ -142,7 +142,7 @@ python -m src.skills.abstract_screener --review-dir reviews/{SLUG} --prepare \
 
 **Step 3** — Save:
 ```bash
-python -m src.skills.abstract_screener --review-dir reviews/{SLUG} --save \
+python3 -m src.skills.abstract_screener --review-dir reviews/{SLUG} --save \
   --offset {CURRENT_OFFSET} --decisions-json '{DECISIONS_JSON}'
 ```
 
@@ -163,7 +163,7 @@ and reads `articles_included.json`. Materialize it from the include/borderline s
 advance the status (abstract-level extraction; no PDFs):
 
 ```bash
-python - <<'EOF'
+python3 - <<'EOF'
 import sys, json; sys.path.insert(0, ".")
 from pathlib import Path
 from src.agent import state as sm
@@ -211,7 +211,7 @@ If `"complete": false`, advance `--batch-offset` by 50 on `--prepare` and pass t
 Note: gap_analyzer is skipped in the quick path. Set status to `gap_analyzed` manually before running synthesizer:
 
 ```bash
-python - <<'EOF'
+python3 - <<'EOF'
 import sys; sys.path.insert(0, ".")
 from pathlib import Path
 from src.agent import state as sm
@@ -283,7 +283,7 @@ Display the artifact list from the full review (Stage 16 Step 2), reporting `art
 
 Same as `/lit-review`:
 ```
-NCBI_API_KEY       — required for PubMed
+NCBI_API_KEY       — recommended (PubMed works without it at a lower rate limit)
 OPENALEX_EMAIL     — recommended
 ```
 
